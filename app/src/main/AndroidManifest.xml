@@ -12,6 +12,39 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Sem3Project">
         <activity
+            android:name=".New"
+            android:exported="true"
+            android:label="@string/title_activity_new"
+            android:theme="@style/Theme.Sem3Project">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".OTP"
+            android:exported="true"
+            android:label="@string/title_activity_otp"
+            android:theme="@style/Theme.Sem3Project">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".Forget"
+            android:exported="true"
+            android:label="@string/title_activity_forget"
+            android:theme="@style/Theme.Sem3Project">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".UserDashboard"
             android:exported="true"
             android:label="@string/title_activity_user_dashboard"
