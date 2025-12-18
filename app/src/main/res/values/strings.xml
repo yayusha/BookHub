@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">Sem 3 Project</string>
     <string name="title_activity_user_dashboard">UserDashboard</string>
+    <string name="title_activity_forget">Forget</string>
+    <string name="title_activity_otp">OTP</string>
+    <string name="title_activity_new">New</string>
+    <string name="title_activity_details">Details</string>
 </resources>
