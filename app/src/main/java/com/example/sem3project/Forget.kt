@@ -44,6 +44,16 @@ import com.example.sem3project.ui.theme.Purple80
 import com.example.sem3project.ui.theme.White20
 import com.example.sem3project.ui.theme.box
 
+
+import com.google.firebase.auth.FirebaseAuth
+import android.widget.Toast
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
+
+
+
 class Forget : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,10 +67,13 @@ class Forget : ComponentActivity() {
 @Composable
 fun Password() {
     var email by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
 
 //    Link
     val context = LocalContext.current
     val activity = context as Activity
+    val auth = FirebaseAuth.getInstance()
+
 
     Scaffold { padding ->
         Column(
@@ -127,11 +140,38 @@ fun Password() {
             )
             Spacer(modifier = Modifier.height(40.dp))
 
+// RESET BUTTON
             Button(
-                onClick = {val intent = Intent(context, UserDashboard::class.java)
-                    intent.putExtra("email",email)
-                    context.startActivity(intent)
-                    activity.finish() },
+                onClick = {
+                    if (email.isNotEmpty()) {
+                        isLoading = true
+                        auth.sendPasswordResetEmail(email.trim())
+                            .addOnCompleteListener { task ->
+                                isLoading = false
+                                if (task.isSuccessful) {
+                                    Toast.makeText(
+                                        context,
+                                        "Reset link sent to your email!",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                    // Navigate back to Login
+                                    val intent = Intent(context, LoginActivity::class.java)
+                                    context.startActivity(intent)
+                                    activity.finish()
+                                } else {
+                                    Toast.makeText(
+                                        context,
+                                        "Error: ${task.exception?.message}",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            }
+                    } else {
+                        Toast.makeText(context, "Please enter your email", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                },
+                enabled = !isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(55.dp)
@@ -139,22 +179,17 @@ fun Password() {
                 colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.Hub)),
                 shape = RoundedCornerShape(30.dp)
             ) {
-                Text(
-                    "Reset Password",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = White20,
-                    modifier = Modifier.clickable() {
-                        val intent = Intent(
-                            context,
-                            OTP::class.java
-                        )
-                        context.startActivity(intent)
-                        activity.finish()
-                    }
-                )
+                if (isLoading) {
+                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                } else {
+                    Text(
+                        "Reset Password",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = White20,
+                    )
+                }
             }
-
 
         }
     }
