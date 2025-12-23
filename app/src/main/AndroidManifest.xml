@@ -23,7 +23,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".New"
+            android:name=".LoginActivity"
             android:exported="true"
             android:label="@string/title_activity_new"
             android:theme="@style/Theme.Sem3Project">
@@ -34,7 +34,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".OTP"
+            android:name=".RegistrationActivity"
             android:exported="true"
             android:label="@string/title_activity_otp"
             android:theme="@style/Theme.Sem3Project">
@@ -48,6 +48,17 @@
             android:name=".Forget"
             android:exported="true"
             android:label="@string/title_activity_forget"
+            android:theme="@style/Theme.Sem3Project">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ReviewActivity"
+            android:exported="true"
+            android:label="@string/title_activity_new"
             android:theme="@style/Theme.Sem3Project">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

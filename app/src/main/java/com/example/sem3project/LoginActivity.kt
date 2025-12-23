@@ -1,9 +1,12 @@
-package com.example.projectsem3
+package com.example.sem3project
+
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -24,16 +28,16 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.projectsem3.ui.theme.ProjectSem3Theme
+import com.example.sem3project.ui.theme.Sem3ProjectTheme
+import com.example.sem3project.ui.theme.box
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            ProjectSem3Theme {
                 LoginBody()
-            }
+
         }
     }
 }
@@ -48,9 +52,13 @@ fun LoginBody() {
 
     var isEmailFocused by remember { mutableStateOf(false) }
     var isPasswordFocused by remember { mutableStateOf(false) }
-
     val BookHubGreen = Color(0xFF4CAF50)
     val InputBackground = Color(0xFFF0F0F0)
+
+
+
+
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -203,6 +211,26 @@ fun LoginBody() {
 
         Spacer(modifier = Modifier.height(45.dp))
 
+        // -------- FORGOT PASSWORD LINK --------
+        Text(
+            text = "Forgot Password?",
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 10.dp)
+                .clickable {
+                    val intent = Intent(context, Forget::class.java)
+                    context.startActivity(intent)
+                },
+            style = TextStyle(
+                textAlign = TextAlign.End,
+                color = BookHubGreen,
+                fontWeight = FontWeight.Medium,
+                fontSize = 14.sp
+            )
+        )
+
+        Spacer(modifier = Modifier.height(30.dp))
+
         // -------- SUBMIT BUTTON --------
         Button(
             onClick = {
@@ -228,9 +256,4 @@ fun LoginBody() {
     }
 }
 
-@Composable
-fun PreviewLogin() {
-    ProjectSem3Theme {
-        LoginBody()
-    }
-}
+

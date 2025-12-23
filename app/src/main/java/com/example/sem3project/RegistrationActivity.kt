@@ -1,4 +1,4 @@
-package com.example.projectsem3
+package com.example.sem3project
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -29,18 +29,16 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.projectsem3.ui.theme.ProjectSem3Theme
-import com.example.projectsem3.ui.theme.White
-import com.example.projectsem3.ui.theme.lightgrey
+import com.example.sem3project.ui.theme.Sem3ProjectTheme
+import com.example.sem3project.ui.theme.White20
+import com.example.sem3project.ui.theme.lightgrey
 
 class RegistrationActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            ProjectSem3Theme {
                 RegistrationBody()
-            }
         }
     }
 }
@@ -71,7 +69,7 @@ fun RegistrationBody() {
                 .padding(horizontal = 20.dp)
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
-                .background(White),
+                .background(White20),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
@@ -311,10 +309,3 @@ fun RegistrationBody() {
 }
 
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewRegistration() {
-    ProjectSem3Theme {
-        RegistrationBody()
-    }
-}
