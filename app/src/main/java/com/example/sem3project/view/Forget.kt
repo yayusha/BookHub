@@ -1,4 +1,4 @@
-package com.example.sem3project.View
+package com.example.sem3project.view
 
 
 import android.app.Activity
@@ -44,7 +44,6 @@ import com.google.firebase.auth.FirebaseAuth
 import android.widget.Toast
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
-import com.example.sem3project.LoginActivity
 import com.example.sem3project.R
 
 

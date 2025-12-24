@@ -1,4 +1,4 @@
-package com.example.sem3project.View
+package com.example.sem3project.view
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
