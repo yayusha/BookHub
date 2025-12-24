@@ -1,4 +1,4 @@
-package com.example.sem3project
+package com.example.sem3project.View
 
 
 import android.app.Activity
@@ -8,7 +8,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,15 +31,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sem3project.ui.theme.blue
-import com.example.sem3project.ui.theme.Sem3ProjectTheme
-import com.example.sem3project.ui.theme.Purple80
 import com.example.sem3project.ui.theme.White20
 import com.example.sem3project.ui.theme.box
 
@@ -49,9 +44,8 @@ import com.google.firebase.auth.FirebaseAuth
 import android.widget.Toast
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.runtime.*
-import androidx.compose.ui.platform.LocalContext
-
+import com.example.sem3project.LoginActivity
+import com.example.sem3project.R
 
 
 class Forget : ComponentActivity() {

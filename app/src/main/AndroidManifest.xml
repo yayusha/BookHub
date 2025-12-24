@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Sem3Project">
         <activity
-            android:name=".Details"
+            android:name=".View.Details"
             android:exported="true"
             android:label="@string/title_activity_details"
             android:theme="@style/Theme.Sem3Project">
@@ -45,7 +45,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Forget"
+            android:name=".View.Forget"
             android:exported="true"
             android:label="@string/title_activity_forget"
             android:theme="@style/Theme.Sem3Project">
