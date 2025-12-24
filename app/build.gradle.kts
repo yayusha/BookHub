@@ -7,12 +7,12 @@ plugins {
 
 android {
     namespace = "com.example.sem3project"
-    compileSdk = 35 // Changed from 36 to 35 (Stable)
+    compileSdk = 35 
 
     defaultConfig {
         applicationId = "com.example.sem3project"
         minSdk = 27
-        targetSdk = 35 // Changed from 36 to 35
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 

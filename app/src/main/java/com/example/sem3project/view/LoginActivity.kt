@@ -1,4 +1,4 @@
-package com.example.sem3project
+package com.example.sem3project.view
 
 import android.content.Intent
 import android.os.Bundle
@@ -28,8 +28,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.sem3project.ui.theme.Sem3ProjectTheme
-import com.example.sem3project.ui.theme.box
+import com.example.sem3project.R
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

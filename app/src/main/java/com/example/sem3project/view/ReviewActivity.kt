@@ -1,4 +1,4 @@
-package com.example.sem3project
+package com.example.sem3project.view
 
 import android.app.Activity
 import android.content.Intent
@@ -27,6 +27,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.sem3project.R
 import com.example.sem3project.ui.theme.Sem3ProjectTheme
 import com.google.firebase.database.*
 
