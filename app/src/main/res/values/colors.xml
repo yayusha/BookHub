@@ -2,4 +2,9 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="Hub">#57A773</color>
+    <color name="Text">#242424</color>
+    <color name="pass">#EEF8FF</color>
+    <color name="Grey">#E7737070</color>
+
 </resources>

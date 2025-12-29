@@ -1,9 +1,9 @@
-package com.example.sem3project
+package com.example.sem3project.view
 
 import androidx.compose.runtime.Composable
 
 @Composable
-fun ProfileScreen()
+fun NotificationScreen()
 {
 
 }

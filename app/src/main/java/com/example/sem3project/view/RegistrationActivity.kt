@@ -1,6 +1,7 @@
-package com.example.projectsem3
+package com.example.sem3project.view
 
 import android.os.Bundle
+import android.util.Patterns
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -18,7 +19,6 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -26,21 +26,18 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.projectsem3.ui.theme.ProjectSem3Theme
-import com.example.projectsem3.ui.theme.White
-import com.example.projectsem3.ui.theme.lightgrey
+import com.example.sem3project.R
+import com.example.sem3project.ui.theme.White20
+import com.example.sem3project.ui.theme.lightgrey
 
 class RegistrationActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            ProjectSem3Theme {
                 RegistrationBody()
-            }
         }
     }
 }
@@ -71,7 +68,7 @@ fun RegistrationBody() {
                 .padding(horizontal = 20.dp)
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
-                .background(White),
+                .background(White20),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
@@ -176,7 +173,7 @@ fun RegistrationBody() {
                 value = email,
                 onValueChange = {
                     email = it
-                    emailError = !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() },
+                    emailError = !Patterns.EMAIL_ADDRESS.matcher(email).matches() },
                 placeholder = { Text("example@gmail.com", color = Color.Gray) },
                 isError = emailError,
                 supportingText = {
@@ -311,10 +308,3 @@ fun RegistrationBody() {
 }
 
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewRegistration() {
-    ProjectSem3Theme {
-        RegistrationBody()
-    }
-}
