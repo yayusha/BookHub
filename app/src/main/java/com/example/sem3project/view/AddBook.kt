@@ -159,7 +159,7 @@ fun AddBookScreen() {
 
         Spacer(modifier = Modifier.height(24.dp))
         Button (
-            onClick = { /* submit */ },
+            onClick = {  },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
