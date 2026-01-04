@@ -48,6 +48,7 @@ fun AddBookScreen() {
     val bookViewModel = remember { BookViewModel(BookRepoImpl()) }
 
     var bookName by remember { mutableStateOf("") }
+    var bookGenre by remember { mutableStateOf("") }
     var bookAuthor by remember { mutableStateOf("") }
     var bookDescription by remember { mutableStateOf("") }
     val context = LocalContext.current
@@ -113,6 +114,16 @@ fun AddBookScreen() {
             shape = RoundedCornerShape(12.dp)
         )
 
+        Text("Genre", modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(
+            value = bookGenre,
+            onValueChange = { bookGenre = it },
+            placeholder = { Text("Fictional") },
+            modifier = Modifier.fillMaxWidth().height(120.dp).padding(vertical = 8.dp),
+            shape = RoundedCornerShape(12.dp),
+            maxLines = 5
+        )
+
         Text("DESCRIPTION", modifier = Modifier.fillMaxWidth())
         OutlinedTextField(
             value = bookDescription,
@@ -123,16 +134,19 @@ fun AddBookScreen() {
             maxLines = 5
         )
 
+
+
         Spacer(modifier = Modifier.height(24.dp))
 
         OutlinedButton(
             onClick = {
-                if (bookName.isBlank() || bookAuthor.isBlank() || bookDescription.isBlank()) {
+                if (bookName.isBlank() || bookAuthor.isBlank() || bookDescription.isBlank() || bookGenre.isBlank()) {
                     Toast.makeText(context, "Please fill all required fields", Toast.LENGTH_LONG).show()
                 } else {
                     val model = BookModel(
                         bookName = bookName,
                         author = bookAuthor,
+                        genreId = bookGenre,
                         description = bookDescription
                     )
                     bookViewModel.addBook(model)

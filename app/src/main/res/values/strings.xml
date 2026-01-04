@@ -6,4 +6,5 @@
     <string name="title_activity_new">New</string>
     <string name="title_activity_details">Details</string>
     <string name="title_activity_add_book">AddBook</string>
+    <string name="title_activity_admin_dashboard">AdminDashboard</string>
 </resources>

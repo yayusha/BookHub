@@ -8,4 +8,6 @@ interface BookRepo {
     fun getBookById(bookID: String, callback: (Boolean, String,BookModel?) -> Unit)
     fun updateBook(model: BookModel, callback: (Boolean, String) -> Unit)
     fun deleteBook(bookID: String, callback: (Boolean, String) -> Unit)
+
+    fun getBookByGenre(genreId:String,callback:(Boolean,String,List<BookModel>?) -> Unit)
 }

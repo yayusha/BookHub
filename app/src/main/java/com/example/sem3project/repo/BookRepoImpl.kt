@@ -6,6 +6,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import kotlin.jvm.java
 
 
 class BookRepoImpl: BookRepo {
@@ -103,4 +104,30 @@ class BookRepoImpl: BookRepo {
         }
 
     }
+
+    override fun getBookByGenre(
+        genreId: String,
+        callback: (Boolean, String, List<BookModel>?) -> Unit
+    ) {
+        ref.orderByChild("genreId").equalTo(genreId)
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists()) {
+                        var allBooks = mutableListOf<BookModel>()
+                        for (data in snapshot.children) {
+                            var book = data.getValue(BookModel::class.java)
+                            if (book != null) {
+                                allBooks.add(book)
+                            }
+                        }
+                        callback(true, "Books fetched", allBooks)
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    callback(false, error.message, emptyList())
+                }
+            })
+    }
+
 }
