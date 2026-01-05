@@ -1,6 +1,6 @@
 package com.example.sem3project.model
 
-data class Review(
+data class ReviewModel(
     val id: String ="",
     val date: String ="",
     val title: String="",
