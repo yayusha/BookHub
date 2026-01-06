@@ -29,6 +29,23 @@ class ReviewRepoImpl: ReviewRepo {
         })
     }
 
+    override fun addReview(
+        review: ReviewModel,
+        callback: (Boolean) -> Unit
+    ) {
+        val dbRef= FirebaseDatabase.getInstance().getReference("reviews")
+        val reviewId = dbRef.push().key ?: ""
+        val finalReview= review.copy(id=reviewId)
+
+        dbRef.child(reviewId).setValue(finalReview)
+            .addOnSuccessListener {
+                callback(true)
+            }
+            .addOnFailureListener {
+                callback(false)
+            }
+    }
+
     override fun saveOrUpdateReview(
         review: ReviewModel,
         isEdit: Boolean,

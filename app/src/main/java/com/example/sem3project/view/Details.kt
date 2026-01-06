@@ -2,7 +2,9 @@ package com.example.sem3project.view
 
 import android.app.Activity
 import android.content.Intent
+import android.icu.text.SimpleDateFormat
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -26,12 +28,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,6 +63,7 @@ import com.example.sem3project.R
 import com.example.sem3project.model.ReviewModel
 import com.example.sem3project.ui.theme.White20
 import com.example.sem3project.viewmodel.ReviewViewModel
+import java.util.Date
 
 class Details : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -92,6 +99,12 @@ fun BookDetailsScreen(reviewViewModel: ReviewViewModel = viewModel()) {
 //    rating
     val averageRating = if(reviewList.isNotEmpty()) reviewList.map { it.rating }.average() else 0.0
     val totalReviews= reviewList.size
+
+//    for review dialog
+    var showReviewDialog by remember {mutableStateOf(false)}
+    var reviewTitle by remember {mutableStateOf("")}
+    var reviewContent by remember {mutableStateOf("")}
+    var reviewRating: Int by remember {mutableStateOf(5)}
 
     val listData= listOf(
         "Fantasy","Contemporary","Romance",
@@ -370,8 +383,7 @@ fun BookDetailsScreen(reviewViewModel: ReviewViewModel = viewModel()) {
 
                     Button(
                         onClick = {
-                            context.startActivity(Intent(context, New::class.java))
-                        },
+                            showReviewDialog =true},
                         modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = BookHubGreen),
                         shape = RoundedCornerShape(12.dp)
@@ -382,7 +394,65 @@ fun BookDetailsScreen(reviewViewModel: ReviewViewModel = viewModel()) {
             }
         }
     }
+    // Review dialog
+    if (showReviewDialog) {
+        AlertDialog(
+            onDismissRequest = { showReviewDialog = false },
+            title = { Text("Write a Review") },
+            text = {
+                Column {
+                    OutlinedTextField(value = reviewTitle, onValueChange = { reviewTitle = it }, label = { Text("Title") }, modifier = Modifier.fillMaxWidth())
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedTextField(value = reviewContent, onValueChange = { reviewContent = it }, label = { Text("Content") }, modifier = Modifier.fillMaxWidth(), minLines = 3)
+                    Spacer(Modifier.height(8.dp))
+                    Text("Rating: $reviewRating Stars")
+                    Slider(value = reviewRating.toFloat(), onValueChange = { reviewRating = it.toInt() }, valueRange = 1f..5f, steps = 3)
+                }
+            },
+            confirmButton = {
+                Button(onClick = {
+                    if (reviewTitle.isNotBlank() && reviewContent.isNotBlank()) {
+                    val newReview = ReviewModel(
+                        id = "",
+                        title = reviewTitle,
+                        content = reviewContent,
+                        rating = reviewRating.toDouble(),
+                        date = SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault()).format(
+                            Date()
+                        )
+                    )
+
+                        reviewViewModel.addReview(newReview) { success ->
+                            if (success) {
+                                showReviewDialog = false
+                                Toast.makeText(context, "Review submitted!", Toast.LENGTH_SHORT).show()
+
+                                reviewTitle = ""
+                                reviewContent = ""
+                                reviewRating = 5
+                            } else {
+                                Toast.makeText(context, "Failed to submit review", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    } else {
+                        Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                    colors = ButtonDefaults.buttonColors(containerColor = BookHubGreen)
+                ) {
+                    Text("Submit", color = Color.White)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {showReviewDialog = false}) {
+                    Text("Cancel", color=Color.Gray)
+                }
+            }
+        )
+
+    }
 }
+
 
 @Composable
 fun ReviewItemUi(review: ReviewModel) {

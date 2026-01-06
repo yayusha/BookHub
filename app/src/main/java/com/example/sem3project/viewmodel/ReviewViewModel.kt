@@ -37,4 +37,10 @@ class ReviewViewModel(val repo: ReviewRepo= ReviewRepoImpl()): ViewModel() {
                   callback: (Boolean) -> Unit){
         repo.rateBook(bookId, rating, callback)
     }
+
+    fun addReview(review: ReviewModel, onResult: (Boolean) -> Unit) {
+        repo.addReview(review) { success ->
+            onResult(success)
+        }
+    }
 }
