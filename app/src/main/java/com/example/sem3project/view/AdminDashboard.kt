@@ -24,9 +24,11 @@
 //import androidx.compose.runtime.remember
 //import androidx.compose.runtime.setValue
 //import androidx.compose.ui.Modifier
-//import androidx.compose.ui.graphics.R
 //import androidx.compose.ui.platform.LocalContext
 //import androidx.compose.ui.res.painterResource
+//
+//
+//
 //
 //class AdminDashboard : ComponentActivity() {
 //    override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,7 +51,7 @@
 //    var selectedIndex by remember { mutableStateOf(0) }
 //
 //    val listItems = listOf(
-//        NavItem(label = "Home",R.drawable.baseline_home),
+//        NavItem(label = "Home", R.drawable.baseline_home_24),
 //        NavItem(label = "Notification", R.drawable.baseline_notifications_24),
 //        NavItem(label = "Profile", R.drawable.baseline_person_24),
 //    )
@@ -88,8 +90,8 @@
 //        ) {
 //            when (selectedIndex) {
 //                0 -> HomeScreen()
-//                2 -> NotificationScreen()
-//                3 -> ProfileScreen()
+//                1 -> NotificationScreen()
+//                2 -> ProfileScreen()
 //                else -> HomeScreen()
 //            }
 //        }
