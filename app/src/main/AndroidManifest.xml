@@ -39,6 +39,14 @@
         <activity
             android:name=".view.MainActivity"
             android:exported="false" />
+        </activity>
+
+        <activity android:name=".view.Details" android:exported="false" />
+        <activity android:name=".view.RegistrationActivity" android:exported="false" />
+        <activity android:name=".view.Forget" android:exported="false" />
+        <activity android:name=".view.UserDashboard" android:exported="false" />
+        <activity android:name=".view.MainActivity" android:exported="false" />
+
     </application>
 
 </manifest>
