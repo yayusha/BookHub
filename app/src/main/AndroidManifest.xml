@@ -8,7 +8,22 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Sem3Project">
+        <activity
+            android:name=".view.AdminDashboard"
+            android:exported="true"
+            android:label="@string/title_activity_admin_dashboard"
+            android:theme="@style/Theme.Sem3Project">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".view.AddBook"
+            android:exported="true"
+            android:label="@string/title_activity_add_book"
+            android:theme="@style/Theme.Sem3Project"></activity>
         <activity
             android:name=".view.LoginActivity"
             android:exported="true"
@@ -16,6 +31,7 @@
             android:theme="@style/Theme.Sem3Project">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -27,4 +43,5 @@
         <activity android:name=".view.MainActivity" android:exported="false" />
 
     </application>
+
 </manifest>
