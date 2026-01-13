@@ -5,7 +5,11 @@
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
+<<<<<<< HEAD
       <SelectionState runConfigName="AddBook (1)">
+=======
+      <SelectionState runConfigName="LoginActivity">
+>>>>>>> production
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
       <SelectionState runConfigName="RegistrationActivity">
@@ -18,6 +22,9 @@
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
       <SelectionState runConfigName="AddBook (4)">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="Details">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

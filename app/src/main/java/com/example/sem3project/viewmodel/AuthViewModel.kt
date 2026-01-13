@@ -14,4 +14,8 @@ class AuthViewModel(val repo: authrepo = authrepoimpl()) : ViewModel() {
         repo.register(email, pass, callback)
     }
 
+    fun forgotPassword(email: String, callback: (Boolean, String) -> Unit) {
+        repo.forgotPassword(email, callback)
+    }
+
 }
