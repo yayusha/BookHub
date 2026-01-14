@@ -2,6 +2,7 @@ package com.example.sem3project
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -28,8 +29,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.sem3project.ui.theme.Sem3ProjectTheme
-import com.example.sem3project.ui.theme.box
+import com.google.firebase.auth.FirebaseAuth
+
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,6 +46,7 @@ class LoginActivity : ComponentActivity() {
 @Composable
 fun LoginBody() {
 
+    val auth = FirebaseAuth.getInstance()
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
@@ -54,8 +56,6 @@ fun LoginBody() {
     var isPasswordFocused by remember { mutableStateOf(false) }
     val BookHubGreen = Color(0xFF4CAF50)
     val InputBackground = Color(0xFFF0F0F0)
-
-
 
 
     val context = LocalContext.current
@@ -234,7 +234,26 @@ fun LoginBody() {
         // -------- SUBMIT BUTTON --------
         Button(
             onClick = {
-                // TODO - Login logic
+                if (email.isEmpty() || password.isEmpty()) {
+                    Toast.makeText(context, "Email and password required", Toast.LENGTH_SHORT)
+                        .show()
+                    return@Button
+                }
+
+                auth.signInWithEmailAndPassword(email, password)
+                    .addOnSuccessListener {
+                        Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
+
+                        val intent = Intent(context, MainActivity::class.java)
+                        context.startActivity(intent)
+                    }
+                    .addOnFailureListener {
+                        Toast.makeText(
+                            context,
+                            it.message ?: "Login failed",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -252,8 +271,5 @@ fun LoginBody() {
             )
         }
 
-        Spacer(modifier = Modifier.height(40.dp))
     }
 }
-
-
