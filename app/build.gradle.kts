@@ -58,6 +58,8 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
     implementation(libs.firebase.database)
+    implementation("com.cloudinary:cloudinary-android:2.1.0")
+    implementation("io.coil-kt:coil-compose:2.5.0")
 
     // Auth Helpers
     implementation(libs.androidx.credentials)
