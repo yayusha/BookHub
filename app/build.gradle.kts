@@ -7,12 +7,12 @@ plugins {
 
 android {
     namespace = "com.example.sem3project"
-    compileSdk = 35 // Changed from 36 to 35 (Stable)
+    compileSdk = 35 
 
     defaultConfig {
         applicationId = "com.example.sem3project"
         minSdk = 27
-        targetSdk = 35 // Changed from 36 to 35
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -58,11 +58,14 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
     implementation(libs.firebase.database)
+    implementation("com.cloudinary:cloudinary-android:2.1.0")
+    implementation("io.coil-kt:coil-compose:2.5.0")
 
     // Auth Helpers
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
+    implementation(libs.androidx.room.ktx)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -71,4 +74,5 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
 }

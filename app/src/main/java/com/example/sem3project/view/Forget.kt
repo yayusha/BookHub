@@ -1,4 +1,4 @@
-package com.example.sem3project
+package com.example.sem3project.view
 
 
 import android.app.Activity
@@ -8,7 +8,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,15 +31,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sem3project.ui.theme.blue
-import com.example.sem3project.ui.theme.Sem3ProjectTheme
-import com.example.sem3project.ui.theme.Purple80
 import com.example.sem3project.ui.theme.White20
 import com.example.sem3project.ui.theme.box
 
@@ -49,9 +44,9 @@ import com.google.firebase.auth.FirebaseAuth
 import android.widget.Toast
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.runtime.*
-import androidx.compose.ui.platform.LocalContext
-
+import com.example.sem3project.R
+import com.example.sem3project.viewmodel.AuthViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 
 class Forget : ComponentActivity() {
@@ -65,14 +60,14 @@ class Forget : ComponentActivity() {
 }
 
 @Composable
-fun Password() {
+fun Password(viewModel: AuthViewModel = viewModel()) {
     var email by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
 
 //    Link
     val context = LocalContext.current
     val activity = context as Activity
-    val auth = FirebaseAuth.getInstance()
+//    val auth = FirebaseAuth.getInstance()
 
 
     Scaffold { padding ->
@@ -121,9 +116,8 @@ fun Password() {
 
             OutlinedTextField(
                 value = email,
-                onValueChange = { data ->
-                    email = data
-                },
+                onValueChange = { email = it},
+
                 placeholder = {
                     Text("Enter your Email")
                 },
@@ -145,32 +139,20 @@ fun Password() {
                 onClick = {
                     if (email.isNotEmpty()) {
                         isLoading = true
-                        auth.sendPasswordResetEmail(email.trim())
-                            .addOnCompleteListener { task ->
-                                isLoading = false
-                                if (task.isSuccessful) {
-                                    Toast.makeText(
-                                        context,
-                                        "Reset link sent to your email!",
-                                        Toast.LENGTH_LONG
-                                    ).show()
-                                    // Navigate back to Login
-                                    val intent = Intent(context, LoginActivity::class.java)
-                                    context.startActivity(intent)
-                                    activity.finish()
-                                } else {
-                                    Toast.makeText(
-                                        context,
-                                        "Error: ${task.exception?.message}",
-                                        Toast.LENGTH_LONG
-                                    ).show()
-                                }
+                        viewModel.forgotPassword(email.trim()) { success, message ->
+                            isLoading = false
+                            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                            if (success) {
+                                val intent = Intent(context, LoginActivity::class.java)
+                                context.startActivity(intent)
+                                activity.finish() // This was inside the Intent parentheses by mistake
                             }
+                        }
                     } else {
-                        Toast.makeText(context, "Please enter your email", Toast.LENGTH_SHORT)
-                            .show()
+                        Toast.makeText(context, "Please enter your email", Toast.LENGTH_SHORT).show()
                     }
                 },
+
                 enabled = !isLoading,
                 modifier = Modifier
                     .fillMaxWidth()

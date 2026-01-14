@@ -1,4 +1,4 @@
-package com.example.sem3project
+package com.example.sem3project.view
 
 
 import android.app.Activity
@@ -26,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import com.example.sem3project.R
 import com.example.sem3project.ui.theme.White20
 import com.example.sem3project.ui.theme.green20
 
@@ -49,9 +50,9 @@ fun DashboardBody(){
     var selectedIndex by remember { mutableStateOf(0) }
 
     val listItems = listOf(
-        NavItem(label = "Home",R.drawable.baseline_home_24),
-        NavItem(label = "Notification",R.drawable.baseline_notifications_24),
-        NavItem(label = "Profile",R.drawable.baseline_person_24),
+        NavItem(label = "Home", R.drawable.baseline_home_24),
+        NavItem(label = "Notification", R.drawable.baseline_notifications_24),
+        NavItem(label = "Profile", R.drawable.baseline_person_24),
 
         )
     Scaffold(
@@ -117,4 +118,10 @@ fun DashboardBody(){
             }
         }
     }
+}
+
+@Composable
+fun HomeScreen(){
+    Text(text = "Home Screen")
+
 }
