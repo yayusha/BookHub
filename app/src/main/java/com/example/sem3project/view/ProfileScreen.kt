@@ -20,7 +20,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sem3project.R
@@ -29,6 +28,7 @@ import com.example.sem3project.R
 fun ProfileScreen() {
 
     var selectedTab by remember { mutableStateOf(1) }
+    var menuExpanded by remember { mutableStateOf(false) }
 
     LazyColumn(
         modifier = Modifier
@@ -37,6 +37,7 @@ fun ProfileScreen() {
         contentPadding = PaddingValues(bottom = 20.dp)
     ) {
 
+        /* ---------------- TOP BAR ---------------- */
         item {
             Row(
                 modifier = Modifier
@@ -45,6 +46,7 @@ fun ProfileScreen() {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
+
                 Icon(
                     painter = painterResource(R.drawable.baseline_arrow_back_24),
                     contentDescription = "Back",
@@ -59,16 +61,32 @@ fun ProfileScreen() {
                     fontWeight = FontWeight.Bold
                 )
 
-                Icon(
-                    painter = painterResource(R.drawable.baseline_menu_24),
-                    contentDescription = "Menu",
-                    modifier = Modifier
-                        .size(22.dp)
-                        .clickable { }
-                )
+                Box {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = "Menu",
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clickable { menuExpanded = true }
+                    )
+
+                    DropdownMenu(
+                        expanded = menuExpanded,
+                        onDismissRequest = { menuExpanded = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Block") },
+                            onClick = {
+                                menuExpanded = false
+                                // TODO: Block user logic
+                            }
+                        )
+                    }
+                }
             }
         }
 
+        /* ---------------- PROFILE IMAGE + FOLLOW BUTTONS ---------------- */
         item {
             Row(
                 modifier = Modifier
@@ -89,13 +107,20 @@ fun ProfileScreen() {
                 Spacer(modifier = Modifier.width(20.dp))
 
                 Row {
-                    StatMini("120", "Followers")
-                    Spacer(modifier = Modifier.width(36.dp))
-                    StatMini("80", "Following")
+                    StatMiniButton("120", "Followers") {
+                        // TODO: Open followers screen
+                    }
+
+                    Spacer(modifier = Modifier.width(20.dp))
+
+                    StatMiniButton("80", "Following") {
+                        // TODO: Open following screen
+                    }
                 }
             }
         }
 
+        /* ---------------- NAME & BIO ---------------- */
         item {
             Column(
                 modifier = Modifier
@@ -119,6 +144,7 @@ fun ProfileScreen() {
             }
         }
 
+        /* ---------------- STATS ---------------- */
         item {
             Row(
                 modifier = Modifier
@@ -135,12 +161,14 @@ fun ProfileScreen() {
             Divider(color = Color(0xFFEAEAEA), thickness = 1.dp)
         }
 
+        /* ---------------- TABS ---------------- */
         item {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(20.dp)
             ) {
+
                 TabButton(
                     text = "Wish List",
                     selected = selectedTab == 0,
@@ -157,6 +185,7 @@ fun ProfileScreen() {
             }
         }
 
+        /* ---------------- CONTENT ---------------- */
         if (selectedTab == 1) {
 
             val reviews = listOf(1, 2, 3, 4, 5)
@@ -174,9 +203,21 @@ fun ProfileScreen() {
     }
 }
 
+/* ---------------- COMPONENTS ---------------- */
+
 @Composable
-fun StatMini(value: String, label: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+fun StatMiniButton(
+    value: String,
+    label: String,
+    onClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .clip(RoundedCornerShape(10.dp))
+            .clickable { onClick() }
+            .padding(horizontal = 14.dp, vertical = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Text(value, fontSize = 17.sp, fontWeight = FontWeight.Bold)
         Text(label, fontSize = 12.sp, color = Color.Gray)
     }
@@ -216,7 +257,6 @@ fun TabButton(
 
 @Composable
 fun ReviewCard() {
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -225,7 +265,6 @@ fun ReviewCard() {
             .background(Color.White, RoundedCornerShape(18.dp))
             .padding(16.dp)
     ) {
-
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
@@ -256,15 +295,13 @@ fun ReviewCard() {
                     )
 
                     Row {
-                        repeat(5) {
-                            Text("⭐", fontSize = 13.sp)
-                        }
+                        repeat(5) { Text("⭐", fontSize = 13.sp) }
                     }
 
                     Spacer(modifier = Modifier.height(6.dp))
 
                     Text(
-                        text = "Honestly, I can’t get over them. The fact that I wanted to cry after reading Landon’s letter to Mia and learning they're having a baby made me want to upgrade my rating from 4.5 to 5 stars",
+                        text = "Honestly, I can’t get over them. The fact that I wanted to cry after reading Landon’s letter...",
                         fontSize = 12.sp,
                         color = Color.Gray,
                         maxLines = 3
@@ -296,9 +333,3 @@ fun WishListPlaceholder() {
         )
     }
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//fun PreviewProfileScreen() {
-//    ProfileScreen()
-//}
