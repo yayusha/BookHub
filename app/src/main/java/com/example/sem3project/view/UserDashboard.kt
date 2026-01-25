@@ -112,7 +112,7 @@ fun DashboardBody(){
         ){
             when(selectedIndex){
                 0 -> HomeScreen()
-                1 -> NotificationScreen()
+                1 -> UserScreen()
                 2 -> ProfileScreen()
                 else -> HomeScreen()
             }

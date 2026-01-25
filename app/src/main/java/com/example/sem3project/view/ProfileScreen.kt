@@ -29,6 +29,7 @@ fun ProfileScreen() {
 
     var selectedTab by remember { mutableStateOf(1) }
     var menuExpanded by remember { mutableStateOf(false) }
+    var showDeactivateDialog by remember { mutableStateOf(false) }
 
     LazyColumn(
         modifier = Modifier
@@ -75,10 +76,10 @@ fun ProfileScreen() {
                         onDismissRequest = { menuExpanded = false }
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Block") },
+                            text = { Text("Deactivate Account") },
                             onClick = {
                                 menuExpanded = false
-                                // TODO: Block user logic
+                                showDeactivateDialog = true
                             }
                         )
                     }
@@ -107,15 +108,11 @@ fun ProfileScreen() {
                 Spacer(modifier = Modifier.width(20.dp))
 
                 Row {
-                    StatMiniButton("120", "Followers") {
-                        // TODO: Open followers screen
-                    }
+                    StatMiniButton("120", "Followers") { }
 
                     Spacer(modifier = Modifier.width(20.dp))
 
-                    StatMiniButton("80", "Following") {
-                        // TODO: Open following screen
-                    }
+                    StatMiniButton("80", "Following") { }
                 }
             }
         }
@@ -201,16 +198,36 @@ fun ProfileScreen() {
             }
         }
     }
+
+    /* ---------------- DEACTIVATE DIALOG ---------------- */
+    if (showDeactivateDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeactivateDialog = false },
+            title = { Text("Deactivate Account") },
+            text = {
+                Text("Are you sure you want to deactivate your account? You can reactivate anytime by logging in again.")
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDeactivateDialog = false
+                    // TODO: Add deactivate logic here
+                }) {
+                    Text("Deactivate")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeactivateDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 }
 
 /* ---------------- COMPONENTS ---------------- */
 
 @Composable
-fun StatMiniButton(
-    value: String,
-    label: String,
-    onClick: () -> Unit
-) {
+fun StatMiniButton(value: String, label: String, onClick: () -> Unit) {
     Column(
         modifier = Modifier
             .clip(RoundedCornerShape(10.dp))
@@ -232,12 +249,7 @@ fun StatLarge(value: String, label: String) {
 }
 
 @Composable
-fun TabButton(
-    text: String,
-    selected: Boolean,
-    modifier: Modifier,
-    onClick: () -> Unit
-) {
+fun TabButton(text: String, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
     Box(
         modifier = modifier
             .height(44.dp)
@@ -309,11 +321,7 @@ fun ReviewCard() {
                 }
             }
 
-            Icon(
-                Icons.Default.MoreVert,
-                contentDescription = null,
-                tint = Color.Gray
-            )
+            Icon(Icons.Default.MoreVert, contentDescription = null, tint = Color.Gray)
         }
     }
 }
@@ -326,10 +334,6 @@ fun WishListPlaceholder() {
             .height(200.dp),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = "Your wishlist is empty.",
-            color = Color.Gray,
-            fontSize = 14.sp
-        )
+        Text("Your wishlist is empty.", color = Color.Gray, fontSize = 14.sp)
     }
 }

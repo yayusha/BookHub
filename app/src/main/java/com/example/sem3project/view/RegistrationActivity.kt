@@ -1,5 +1,6 @@
 package com.example.sem3project.view
 
+import android.app.Activity
 import android.os.Bundle
 import android.util.Patterns
 import android.widget.Toast
@@ -7,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,8 +33,10 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sem3project.R
+
 import com.example.sem3project.model.UserModel
 import com.example.sem3project.ui.theme.White20
+import com.example.sem3project.ui.theme.blue20
 import com.example.sem3project.ui.theme.lightgrey
 import com.example.sem3project.viewmodel.AuthViewModel
 import com.google.firebase.auth.FirebaseAuth
@@ -55,6 +59,7 @@ fun RegistrationBody() {
     val authViewModel = remember { AuthViewModel() }
 
 
+    
 
     var fullName by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
@@ -70,6 +75,7 @@ fun RegistrationBody() {
     var isUsernameFocused by remember { mutableStateOf(false) }
 
     val green = Color(0xFF4CAF50)
+    val activity = context as? Activity
 
     Scaffold(modifier = Modifier.fillMaxSize()) { padding ->
 
@@ -343,6 +349,22 @@ fun RegistrationBody() {
             }
 
             Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Row (
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text("Already have an account? ")
+                Text(
+                    text = "Login",
+                    color = blue20,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.clickable() {
+                        activity?.finish()
+                    }
+                )
+            }
         }
     }
 }
