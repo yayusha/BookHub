@@ -57,6 +57,7 @@ class AddBook : ComponentActivity() {
     fun AddBookScreen() {
         val context = LocalContext.current
 
+
         val bookViewModel = remember { BookViewModel(BookRepoImpl()) }
         val imageViewModel = remember { ImageViewModel(ImageRepoImpl()) }
 

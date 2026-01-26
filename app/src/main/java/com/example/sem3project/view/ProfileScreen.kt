@@ -1,5 +1,8 @@
 package com.example.sem3project.view
 
+
+import androidx.compose.runtime.Composable
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,7 +23,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sem3project.R
@@ -78,7 +80,7 @@ fun ProfileScreen() {
             ) {
 
                 Image(
-                    painter = painterResource(id = R.drawable.icon),
+                    painter = painterResource(id = R.drawable.placeholder),
                     contentDescription = "Profile",
                     modifier = Modifier
                         .size(125.dp)
@@ -296,9 +298,3 @@ fun WishListPlaceholder() {
         )
     }
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//fun PreviewProfileScreen() {
-//    ProfileScreen()
-//}

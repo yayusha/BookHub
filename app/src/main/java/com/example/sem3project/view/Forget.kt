@@ -1,3 +1,4 @@
+
 package com.example.sem3project.view
 
 
@@ -139,7 +140,7 @@ fun Password(viewModel: AuthViewModel = viewModel()) {
                 onClick = {
                     if (email.isNotEmpty()) {
                         isLoading = true
-                        viewModel.forgotPassword(email.trim()) { success, message ->
+                        viewModel.forgetPassword(email.trim()) { success, message ->
                             isLoading = false
                             Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                             if (success) {
@@ -176,4 +177,5 @@ fun Password(viewModel: AuthViewModel = viewModel()) {
         }
     }
 }
+
 

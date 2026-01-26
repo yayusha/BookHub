@@ -120,8 +120,4 @@ fun DashboardBody(){
     }
 }
 
-@Composable
-fun HomeScreen(){
-    Text(text = "Home Screen")
 
-}
