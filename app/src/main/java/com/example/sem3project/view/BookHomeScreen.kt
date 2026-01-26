@@ -9,21 +9,27 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.sem3project.R
@@ -31,84 +37,188 @@ import com.example.sem3project.model.BookModel
 import com.example.sem3project.repo.BookRepoImpl
 import com.example.sem3project.ui.theme.green20
 import com.example.sem3project.viewmodel.BookViewModel
+import kotlinx.coroutines.launch
 
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookHomeScreen() {
     val bookViewModel: BookViewModel = remember { BookViewModel(BookRepoImpl()) }
     val bookList by bookViewModel.allBooks.observeAsState(initial = emptyList())
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+
     LaunchedEffect(Unit) {
         bookViewModel.getAllProduct()
     }
-    Scaffold(
-        topBar = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(green20)
-                    .padding(top = 32.dp, bottom = 12.dp, start = 8.dp, end = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                IconButton(onClick = { /* TODO: Open Drawer */ }) {
-                    Icon(
-                        imageVector = Icons.Default.Menu,
-                        contentDescription = "Menu",
-                        tint = Color.White,
-                        modifier = Modifier.size(30.dp)
-                    )
-                }
-                Text("Admin Dashboard", color = Color.White, fontWeight = FontWeight.Bold)
 
-                IconButton(onClick = { /* TODO: Search */ }) {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Search",
-                        tint = Color.White,
-                        modifier = Modifier.size(30.dp)
-                    )
-                }
-            }
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { /* TODO: Navigate to Add Book */ },
-                containerColor = Color(0xFFEADDFF),
-                shape = RoundedCornerShape(16.dp)
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet(
+                drawerContainerColor = Color.White
             ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Add",
-                    tint = Color.Black
-                )
+                DrawerContent()
             }
         }
-    ) { innerPadding ->
-        val displayList = bookList ?: emptyList()
+    ) {
+        Scaffold(
+            topBar = {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(green20)
+                        .padding(top = 32.dp, bottom = 12.dp, start = 8.dp, end = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    IconButton(onClick = {
+                        scope.launch {
+                            drawerState.open()
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Menu,
+                            contentDescription = "Menu",
+                            tint = Color.White,
+                            modifier = Modifier.size(30.dp)
+                        )
+                    }
+                    Text("Admin Dashboard", color = Color.White, fontWeight = FontWeight.Bold)
 
-        if (displayList.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = green20)
-
-
+                    IconButton(onClick = { /* TODO: Search */ }) {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Search",
+                            tint = Color.White,
+                            modifier = Modifier.size(30.dp)
+                        )
+                    }
+                }
+            },
+            floatingActionButton = {
+                FloatingActionButton(
+                    onClick = { /* TODO: Navigate to Add Book */ },
+                    containerColor = Color(0xFFEADDFF),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Add",
+                        tint = Color.Black
+                    )
+                }
             }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(12.dp)
-            ) {
-                items(displayList) { item ->
-                    BookCard(book = item, viewModel = bookViewModel)
+        ) { innerPadding ->
+            val displayList = bookList ?: emptyList()
+
+            if (displayList.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = green20)
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(12.dp)
+                ) {
+                    items(displayList) { item ->
+                        BookCardUI(book = item, viewModel = bookViewModel)
+                    }
                 }
             }
         }
     }
 }
+
 @Composable
-fun BookCard(book: BookModel, viewModel: BookViewModel) {
+fun DrawerContent() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(vertical = 24.dp)
+    ) {
+        // Header
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .padding(bottom = 16.dp)
+        ) {
+            Column {
+                Text(
+                    text = "Book Hub",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = green20
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Admin Panel",
+                    fontSize = 14.sp,
+                    color = Color.Gray
+                )
+            }
+        }
+
+        Divider()
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Menu Items
+        DrawerMenuItem(
+            icon = Icons.Default.Home,
+            label = "Dashboard",
+            onClick = { /* Already on Dashboard */ }
+        )
+
+        DrawerMenuItem(
+            icon = Icons.Default.Star,
+            label = "View Books",
+            onClick = { /* TODO: Navigate to Profile */ }
+        )
+
+        DrawerMenuItem(
+            icon = Icons.Default.Settings,
+            label = "Settings",
+            onClick = { /* TODO: Navigate to Settings */ }
+        )
+    }
+}
+
+@Composable
+fun DrawerMenuItem(
+    icon: ImageVector,
+    label: String,
+    onClick: () -> Unit
+) {
+    NavigationDrawerItem(
+        icon = {
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                tint = green20
+            )
+        },
+        label = {
+            Text(
+                text = label,
+                fontSize = 16.sp
+            )
+        },
+        selected = false,
+        onClick = onClick,
+        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+        colors = NavigationDrawerItemDefaults.colors(
+            unselectedContainerColor = Color.Transparent,
+            selectedContainerColor = green20.copy(alpha = 0.1f)
+        )
+    )
+}
+
+@Composable
+fun BookCardUI(book: BookModel, viewModel: BookViewModel) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -160,11 +270,8 @@ fun BookCard(book: BookModel, viewModel: BookViewModel) {
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                // Fixed
-
                 Button(
-                    onClick = {
-                    },
+                    onClick = { /* TODO: Navigate to Edit */ },
                     colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray),
                     shape = RoundedCornerShape(8.dp),
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
