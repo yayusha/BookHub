@@ -1,113 +1,87 @@
 package com.example.sem3project.view
 
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberAsyncImagePainter
-import com.example.sem3project.R
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.sem3project.model.UserModel
+import com.example.sem3project.viewmodel.AdminViewModel
 
 @Composable
-fun UserScreen(
-    onBanUser: () -> Unit = {}
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Text(
-            text = "User Screen",
-            style = MaterialTheme.typography.headlineMedium
-        )
+fun UserScreen(adminViewModel: AdminViewModel = viewModel()) {
 
-        Spacer(modifier = Modifier.height(20.dp))
+    val users by adminViewModel.usersList
+    val actionStatus by adminViewModel.actionStatus
 
-        UserCard(onBanUser = onBanUser)
+    // Fetch users once when screen loads
+    LaunchedEffect(Unit) {
+        adminViewModel.fetchUsers()
+    }
+
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .padding(16.dp)) {
+
+        Text("Registered Users", style = MaterialTheme.typography.titleLarge)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Show action status if any
+        actionStatus?.let { (success, msg) ->
+            Text(
+                text = msg,
+                color = if (success) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        if (users.isEmpty()) {
+            Text("No users found", style = MaterialTheme.typography.bodyMedium)
+        } else {
+            LazyColumn {
+                items(users) { user ->
+                    UserItem(user = user, adminViewModel = adminViewModel)
+                }
+            }
+        }
     }
 }
 
 @Composable
-fun UserCard(onBanUser: () -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
-    var email by remember { mutableStateOf("") }
-    var imageUri by remember { mutableStateOf<Uri?>(null) }
-
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri ->
-        imageUri = uri
-    }
-
-    val painter = if (imageUri != null) {
-        rememberAsyncImagePainter(imageUri)
-    } else {
-        painterResource(id = R.drawable.icon)
-    }
-
+fun UserItem(user: UserModel, adminViewModel: AdminViewModel) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            Column {
+                Text(text = "Email: ${user.email ?: "N/A"}", style = MaterialTheme.typography.bodyMedium)
+                Text(text = "Name: ${user.firstName ?: ""} ${user.lastName ?: ""}", style = MaterialTheme.typography.bodySmall)
+                Text(text = "Status: ${if (user.isBanned) "Banned" else "Active"}", style = MaterialTheme.typography.bodySmall)
+            }
 
-            Image(
-                painter = painter,
-                contentDescription = "Profile Image",
-                modifier = Modifier
-                    .size(55.dp)
-                    .clip(CircleShape)
-                    .clickable { launcher.launch("image/*") },
-                contentScale = ContentScale.Crop
-            )
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                placeholder = { Text("Enter email") },
-                singleLine = true,
-                modifier = Modifier.weight(1f)
-            )
-
-            Box {
-                IconButton(onClick = { expanded = true }) {
-                    Icon(Icons.Default.MoreVert, contentDescription = "More")
+            Button(
+                onClick = {
+                    if (user.isBanned) {
+                        adminViewModel.unbanUser(user.userId ?: "")
+                    } else {
+                        adminViewModel.banUser(user.userId ?: "")
+                    }
                 }
-
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("BAN User") },
-                        onClick = {
-                            expanded = false
-                            onBanUser()
-                        }
-                    )
-                }
+            ) {
+                Text(if (user.isBanned) "Unban" else "Ban")
             }
         }
     }

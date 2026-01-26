@@ -27,6 +27,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.sem3project.viewmodel.AdminViewModel
+
 
 
 
@@ -46,6 +49,9 @@ class AdminDashboard : ComponentActivity() {
 fun DashBody() {
     val context = LocalContext.current
     val activity = context as Activity
+
+    // ✅ Create AdminViewModel for Compose
+    val adminViewModel: AdminViewModel = viewModel()
 
     data class NavItem(val label: String, val icon: Int)
 
@@ -92,7 +98,7 @@ fun DashBody() {
             when (selectedIndex) {
                 0 -> HomeScreen()
                 1 -> UserScreen()
-                2 -> ProfileScreen()
+                2 -> AdminProfile()
                 else -> HomeScreen()
             }
         }

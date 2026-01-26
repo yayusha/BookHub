@@ -7,8 +7,9 @@ data class UserModel(
     val lastName: String? = "",
     val phoneNumber: String? = "",
     val status: String = "active"
-
 ) {
+    val isBanned: Boolean
+        get() = status == "banned"
     fun toMap(): Map<String, Any?> {
         return mapOf(
             "userId" to userId,
@@ -17,6 +18,7 @@ data class UserModel(
             "lastName" to lastName,
             "phoneNumber" to phoneNumber,
             "status" to status
+
         )
     }
 }
