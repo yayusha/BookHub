@@ -1,5 +1,6 @@
 package com.example.sem3project.view
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -245,9 +246,11 @@ fun LoginBody() {
                     .addOnSuccessListener {
                         Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
 
-                        val intent = Intent(context, MainActivity::class.java)
+                        val intent = Intent(context, UserDashboard::class.java)
                         context.startActivity(intent)
+                        (context as? Activity)?.finish()
                     }
+
                     .addOnFailureListener {
                         Toast.makeText(
                             context,

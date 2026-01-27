@@ -1,6 +1,7 @@
 package com.example.sem3project.view
 
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.util.Patterns
 import android.widget.Toast
@@ -329,7 +330,12 @@ fun RegistrationBody() {
                                     authViewModel.addUserToDatabase(userId, user) { dbSuccess, dbMsg ->
                                         if (dbSuccess) {
                                             Toast.makeText(context, "Registration successful 🎉", Toast.LENGTH_SHORT).show()
-                                        } else {
+
+                                            val intent = Intent(context, LoginActivity::class.java)
+                                            context.startActivity(intent)
+                                            activity?.finish()
+                                        }
+                                        else {
                                             Toast.makeText(context, dbMsg, Toast.LENGTH_LONG).show()
                                         }
                                     }

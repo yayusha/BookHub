@@ -98,7 +98,7 @@ fun DashBody() {
             when (selectedIndex) {
                 0 -> HomeScreen()
                 1 -> UserScreen()
-                2 -> AdminProfile()
+                2 -> AdminProfileScreen()
                 else -> HomeScreen()
             }
         }

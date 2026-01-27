@@ -23,14 +23,45 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sem3project.R
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 @Composable
 fun ProfileScreen() {
+    val auth = FirebaseAuth.getInstance()
+    val user = auth.currentUser
+    val userId = user?.uid
 
+    val dbRef = FirebaseDatabase.getInstance().reference.child("users")
+
+    var userName by remember { mutableStateOf("") }
+    var userEmail by remember { mutableStateOf("") }
     var selectedTab by remember { mutableStateOf(1) }
     var menuExpanded by remember { mutableStateOf(false) }
     var showDeactivateDialog by remember { mutableStateOf(false) }
 
+    // Fetch user info once when Composable launches
+    LaunchedEffect(userId) {
+        if (userId != null) {
+            dbRef.child(userId).addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists()) {
+                        val firstName = snapshot.child("firstName").getValue(String::class.java) ?: ""
+                        val lastName = snapshot.child("lastName").getValue(String::class.java) ?: ""
+                        userName = "$firstName $lastName"
+                        userEmail = snapshot.child("email").getValue(String::class.java) ?: ""
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    println("DB Error: ${error.message}")
+                }
+            })
+        }
+    }
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -87,13 +118,13 @@ fun ProfileScreen() {
             }
         }
 
-        /* ---------------- PROFILE IMAGE + FOLLOW BUTTONS ---------------- */
+        /* ---------------- PROFILE IMAGE (CENTERED) ---------------- */
         item {
-            Row(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp),
-                verticalAlignment = Alignment.CenterVertically
+                contentAlignment = Alignment.Center
             ) {
 
                 Image(
@@ -104,18 +135,9 @@ fun ProfileScreen() {
                         .clip(CircleShape),
                     contentScale = ContentScale.Crop
                 )
-
-                Spacer(modifier = Modifier.width(20.dp))
-
-                Row {
-                    StatMiniButton("120", "Followers") { }
-
-                    Spacer(modifier = Modifier.width(20.dp))
-
-                    StatMiniButton("80", "Following") { }
-                }
             }
         }
+
 
         /* ---------------- NAME & BIO ---------------- */
         item {
@@ -126,15 +148,15 @@ fun ProfileScreen() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Alex John",
-                    fontSize = 30.sp,
-                    fontWeight = FontWeight.Bold
+                    text = userName.ifEmpty { "Loading..." },
+                    fontSize = 30.sp
+
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = "I read books.",
+                    text = userEmail,
                     fontSize = 15.sp,
                     color = Color.Gray
                 )
