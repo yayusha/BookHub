@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
@@ -167,21 +168,22 @@ fun DrawerContent() {
         Spacer(modifier = Modifier.height(16.dp))
 
         // Menu Items
-        DrawerMenuItem(
-            icon = Icons.Default.Home,
-            label = "Dashboard",
-            onClick = { /* Already on Dashboard */ }
-        )
 
         DrawerMenuItem(
             icon = Icons.Default.Star,
-            label = "View Books",
-            onClick = { /* TODO: Navigate to Profile */ }
+            label = "View reported reviews",
+            onClick = { /* TODO: Navigate to reported reviews */ }
         )
 
         DrawerMenuItem(
             icon = Icons.Default.Settings,
             label = "Settings",
+            onClick = { /* TODO: Navigate to Settings */ }
+        )
+
+        DrawerMenuItem(
+            icon = Icons.Default.Lock,
+            label = "Logout",
             onClick = { /* TODO: Navigate to Settings */ }
         )
     }
