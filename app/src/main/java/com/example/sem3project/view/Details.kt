@@ -2,7 +2,8 @@ package com.example.sem3project.view
 
 import android.app.Activity
 import android.content.Intent
-import android.icu.text.SimpleDateFormat
+import java.text.SimpleDateFormat
+import java.util.Locale
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -76,7 +77,7 @@ class Details : ComponentActivity() {
 }
 
 @Composable
-fun BookDetailsScreen(reviewViewModel: ReviewViewModel = viewModel()) {
+fun BookDetailsScreen(reviewViewModel: ReviewViewModel = viewModel<ReviewViewModel>()) {
 
     var isDescriptionExpanded by remember { mutableStateOf(false) }
     var isSummaryExpanded by remember { mutableStateOf(false) }

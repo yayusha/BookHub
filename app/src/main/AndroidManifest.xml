@@ -8,39 +8,37 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Sem3Project">
-        <activity
-            android:name=".view.AdminDashboard"
-            android:exported="true"
-            android:label="@string/title_activity_admin_dashboard"
-            android:theme="@style/Theme.Sem3Project">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+        <!-- ✅ ONLY ONE LAUNCHER -->
         <activity
-            android:name=".view.AddBook"
-            android:exported="true"
-            android:label="@string/title_activity_add_book"
-            android:theme="@style/Theme.Sem3Project"></activity>
-        <activity
-            android:name=".view.LoginActivity"
+            android:name=".view.RegistrationActivity"
             android:exported="true"
             android:label="Login"
             android:theme="@style/Theme.Sem3Project">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <activity android:name=".view.Details" android:exported="false" />
-        <activity android:name=".view.RegistrationActivity" android:exported="false" />
-        <activity android:name=".view.Forget" android:exported="false" />
-        <activity android:name=".view.UserDashboard" android:exported="false" />
-        <activity android:name=".view.MainActivity" android:exported="false" />
+        <!-- Admin Dashboard (NO launcher) -->
+        <activity
+            android:name=".view.AdminDashboard"
+            android:exported="true"
+            android:label="Admin Dashboard"
+            android:theme="@style/Theme.Sem3Project" />
+
+        <activity
+            android:name=".view.AddBook"
+            android:exported="true"
+            android:label="Add Book"
+            android:theme="@style/Theme.Sem3Project" />
+
+        <activity android:name=".view.Details" />
+        <activity android:name=".view.LoginActivity" />
+        <activity android:name=".view.Forget" />
+        <activity android:name=".view.UserDashboard" />
+        <activity android:name=".view.MainActivity" />
 
     </application>
 

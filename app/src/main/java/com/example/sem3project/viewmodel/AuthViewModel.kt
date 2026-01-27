@@ -3,10 +3,10 @@ package com.example.sem3project.viewmodel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.sem3project.model.UserModel
-import com.example.sem3project.repo.authrepo
-import com.example.sem3project.repo.authrepoimpl
+import com.example.sem3project.repo.AuthRepo
+import com.example.sem3project.repo.AuthRepoImpl
 
-class AuthViewModel(val repo: authrepo = authrepoimpl()) : ViewModel() {
+class AuthViewModel(val repo: AuthRepo = AuthRepoImpl()) : ViewModel() {
 
     fun login(email: String, pass: String, callback: (Boolean, String) -> Unit) {
         repo.login(email, pass, callback)
@@ -51,15 +51,12 @@ class AuthViewModel(val repo: authrepo = authrepoimpl()) : ViewModel() {
 
     fun getUserById(
         userId: String
-    ){
-        repo.getUserById(userId){
-                success,msg,data->
-            if(success){
+    ) {
+        repo.getUserById(userId) { success, msg, data ->
+            if (success) {
                 _users.postValue(data)
             }
         }
-    fun forgotPassword(email: String, callback: (Boolean, String) -> Unit) {
-        repo.forgotPassword(email, callback)
     }
 
 }

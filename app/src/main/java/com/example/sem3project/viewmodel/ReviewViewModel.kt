@@ -22,9 +22,11 @@ class ReviewViewModel(val repo: ReviewRepo= ReviewRepoImpl()): ViewModel() {
         }
     }
 
-    fun saveOrUpdateReview( review: ReviewModel,
-                            isEdit: Boolean, callback:(Boolean) -> Unit){
-        repo.saveOrUpdateReview(review,isEdit, callback)
+    fun saveOrUpdateReview(review: ReviewModel, isEdit: Boolean, callback: (Boolean) -> Unit) {
+        repo.saveOrUpdateReview(review, isEdit) { success ->
+            if (success) fetchReviews()
+            callback(success)
+        }
     }
 
     fun toggleBookInList(userId: String, bookId: String,
@@ -40,6 +42,7 @@ class ReviewViewModel(val repo: ReviewRepo= ReviewRepoImpl()): ViewModel() {
 
     fun addReview(review: ReviewModel, onResult: (Boolean) -> Unit) {
         repo.addReview(review) { success ->
+            if (success) fetchReviews()
             onResult(success)
         }
     }

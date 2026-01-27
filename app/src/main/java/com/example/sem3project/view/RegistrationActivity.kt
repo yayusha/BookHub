@@ -1,5 +1,6 @@
 package com.example.sem3project.view
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Patterns
 import android.widget.Toast
@@ -7,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -323,7 +325,14 @@ fun RegistrationBody() {
                                     authViewModel.addUserToDatabase(userId, user) { dbSuccess, dbMsg ->
                                         if (dbSuccess) {
                                             Toast.makeText(context, "Registration successful 🎉", Toast.LENGTH_SHORT).show()
-                                        } else {
+
+                                            val intent = Intent(context, LoginActivity::class.java)
+                                            context.startActivity(intent)
+
+                                            // closes registration screen
+                                            (context as ComponentActivity).finish()
+                                        }
+                                        else {
                                             Toast.makeText(context, dbMsg, Toast.LENGTH_LONG).show()
                                         }
                                     }
@@ -343,6 +352,28 @@ fun RegistrationBody() {
             }
 
             Spacer(modifier = Modifier.height(30.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "Already have an account? ",
+                    color = Color.Gray,
+                    fontSize = 14.sp
+                )
+
+                Text(
+                    text = "Log in",
+                    color = Color(0xFF4CAF50),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.clickable {
+                        val intent = Intent(context, LoginActivity::class.java)
+                        context.startActivity(intent)
+                    }
+                )
+            }
         }
     }
 }

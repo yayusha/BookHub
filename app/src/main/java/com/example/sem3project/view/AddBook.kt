@@ -36,7 +36,7 @@ import com.example.sem3project.model.BookModel
 import com.example.sem3project.repo.BookRepoImpl
 import com.example.sem3project.repo.ImageRepoImpl
 import com.example.sem3project.utils.ImageUtils
-import com.example.sem3project.view.ui.theme.green20
+import com.example.sem3project.ui.theme.green20
 import com.example.sem3project.viewmodel.BookViewModel
 import com.example.sem3project.viewmodel.ImageViewModel
 
