@@ -2,16 +2,16 @@
 <project version="4">
   <component name="deploymentTargetSelector">
     <selectionStates>
-      <SelectionState runConfigName="AdminDashboard (1)">
+      <SelectionState runConfigName="Details">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="AdminDashboard (3)">
+      <SelectionState runConfigName="Details (1)">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="AdminDashboard (4)">
+      <SelectionState runConfigName="Details (2)">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="AdminDashboard (5)">
+      <SelectionState runConfigName="Details (3)">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
       <SelectionState runConfigName="AdminDashboard">

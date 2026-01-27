@@ -1,6 +1,9 @@
 package com.example.sem3project.view
 
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 
 import androidx.compose.foundation.Image
@@ -15,22 +18,43 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sem3project.R
+import com.example.sem3project.repo.ImageRepoImpl
+import com.example.sem3project.viewmodel.ImageViewModel
 
 @Composable
 fun ProfileScreen() {
+    val context = LocalContext.current
+    val imageViewModel = remember { ImageViewModel(ImageRepoImpl()) }
 
     var selectedTab by remember { mutableStateOf(1) }
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
+    var cloudinaryLink by remember { mutableStateOf("") }
+    val imagePickerLauncher =
+    rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        imageUri = uri
+        imageUri?.let {
+            imageViewModel.uploadImage(context, it) { success, message ->
+                if (success) {
+                    cloudinaryLink = message.toString()
+                }
+            }
+        }
+    }
 
     LazyColumn(
         modifier = Modifier

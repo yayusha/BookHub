@@ -22,6 +22,7 @@ import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+// admin review screen
 fun ReviewScreen(
     viewModel: ReviewViewModel,
     onMenuClick: () -> Unit
