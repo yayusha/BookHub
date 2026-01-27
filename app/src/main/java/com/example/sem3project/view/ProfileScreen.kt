@@ -42,6 +42,8 @@ fun ProfileScreen() {
     var selectedTab by remember { mutableStateOf(1) }
     var menuExpanded by remember { mutableStateOf(false) }
     var showDeactivateDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
 
     // Fetch user info once when Composable launches
     LaunchedEffect(userId) {
@@ -111,6 +113,13 @@ fun ProfileScreen() {
                             onClick = {
                                 menuExpanded = false
                                 showDeactivateDialog = true
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Delete Account", color = Color.Red) },
+                            onClick = {
+                                menuExpanded = false
+                                showDeleteDialog = true
                             }
                         )
                     }
