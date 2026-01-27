@@ -38,7 +38,6 @@ import coil.request.ImageRequest
 import com.example.sem3project.R
 import com.example.sem3project.model.BookModel
 import com.example.sem3project.repo.BookRepoImpl
-import com.example.sem3project.ui.theme.White20
 import com.example.sem3project.ui.theme.green20
 import com.example.sem3project.viewmodel.BookViewModel
 import com.example.sem3project.viewmodel.ReviewViewModel
@@ -91,7 +90,6 @@ fun BookHomeScreen() {
             }
         }
     ) {
-        // Show different screens based on currentScreen state
         when (currentScreen) {
             AdminScreen.BOOK_LIST -> {
                 BookListScreen(
@@ -238,6 +236,9 @@ fun BookListScreen(
     bookViewModel: BookViewModel,
     onMenuClick: () -> Unit
 ) {
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var bookToDelete by remember { mutableStateOf<BookModel?>(null) }
+
     Scaffold(
         topBar = {
             Row(
@@ -284,32 +285,86 @@ fun BookListScreen(
     ) { innerPadding ->
         val displayList = bookList ?: emptyList()
 
-        if (displayList.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = green20)
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(12.dp)
-            ) {
-                items(displayList) { item ->
-                    BookCardUI(book = item, viewModel = bookViewModel)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            if (displayList.isEmpty()) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center),
+                    color = green20
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(
+                        start = 12.dp,
+                        end = 12.dp,
+                        top = 12.dp,
+                        bottom = 80.dp
+                    )
+                ) {
+                    items(displayList) { item ->
+                        BookCardUI(
+                            book = item,
+                            viewModel = bookViewModel,
+                            onDeleteClick = {
+                                bookToDelete = item
+                                showDeleteDialog = true
+                            }
+                        )
+                    }
                 }
             }
         }
     }
+
+    // Delete confirmation dialog
+    if (showDeleteDialog && bookToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Delete Book") },
+            text = {
+                Text("Are you sure you want to delete this book? This action cannot be undone.")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        bookToDelete?.let {
+                            bookViewModel.deleteBook(it.bookId) { success, message ->
+                                /* Handle result */
+                            }
+                        }
+                        showDeleteDialog = false
+                        bookToDelete = null
+                    }
+                ) {
+                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showDeleteDialog = false
+                    bookToDelete = null
+                }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 }
 
-// Placeholder Settings Screen
+// Settings Screen with Theme Toggle
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     onMenuClick: () -> Unit
 ) {
+    // State to track theme preference
+    var isDarkTheme by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             Row(
@@ -335,35 +390,75 @@ fun SettingsScreen(
             }
         }
     ) { innerPadding ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
-            contentAlignment = Alignment.Center
+                .padding(innerPadding)
+                .padding(16.dp)
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+            Text(
+                text = "Appearance",
+                style = MaterialTheme.typography.titleLarge,
+                color = green20,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(vertical = 16.dp)
+            )
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
-                Text(
-                    text = "Settings",
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = green20,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Settings content will be added here",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Color.Gray
-                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Dark Theme",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.Black
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = if (isDarkTheme) "Dark mode enabled" else "Light mode enabled",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Gray
+                        )
+                    }
+
+                    Switch(
+                        checked = isDarkTheme,
+                        onCheckedChange = {
+                            isDarkTheme = it
+                            // TODO: Save preference to SharedPreferences and apply theme
+                        },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = Color.White,
+                            checkedTrackColor = green20,
+                            uncheckedThumbColor = Color.White,
+                            uncheckedTrackColor = Color.Gray
+                        )
+                    )
+                }
             }
+
         }
     }
 }
 
 @Composable
-fun BookCardUI(book: BookModel, viewModel: BookViewModel) {
+fun BookCardUI(
+    book: BookModel,
+    viewModel: BookViewModel,
+    onDeleteClick: () -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -425,11 +520,7 @@ fun BookCardUI(book: BookModel, viewModel: BookViewModel) {
                 }
 
                 Button(
-                    onClick = {
-                        viewModel.deleteBook(book.bookId) { success, message ->
-                            /* Handle result */
-                        }
-                    },
+                    onClick = onDeleteClick,
                     colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray),
                     shape = RoundedCornerShape(8.dp),
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
