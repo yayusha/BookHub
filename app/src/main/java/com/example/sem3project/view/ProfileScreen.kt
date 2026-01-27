@@ -20,10 +20,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sem3project.R
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -43,40 +45,35 @@ fun ProfileScreen() {
     var menuExpanded by remember { mutableStateOf(false) }
     var showDeactivateDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var deletePassword by remember { mutableStateOf("") }
 
 
-    // Fetch user info once when Composable launches
     LaunchedEffect(userId) {
         if (userId != null) {
             dbRef.child(userId).addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (snapshot.exists()) {
-                        val firstName = snapshot.child("firstName").getValue(String::class.java) ?: ""
+                        val firstName =
+                            snapshot.child("firstName").getValue(String::class.java) ?: ""
                         val lastName = snapshot.child("lastName").getValue(String::class.java) ?: ""
                         userName = "$firstName $lastName"
                         userEmail = snapshot.child("email").getValue(String::class.java) ?: ""
                     }
                 }
 
-                override fun onCancelled(error: DatabaseError) {
-                    println("DB Error: ${error.message}")
-                }
+                override fun onCancelled(error: DatabaseError) {}
             })
         }
     }
+
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White),
+        modifier = Modifier.fillMaxSize().background(Color.White),
         contentPadding = PaddingValues(bottom = 20.dp)
     ) {
-
-        /* ---------------- TOP BAR ---------------- */
+        // ---------------- TOP BAR ----------------
         item {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -84,24 +81,16 @@ fun ProfileScreen() {
                 Icon(
                     painter = painterResource(R.drawable.baseline_arrow_back_24),
                     contentDescription = "Back",
-                    modifier = Modifier
-                        .size(26.dp)
-                        .clickable { }
+                    modifier = Modifier.size(26.dp).clickable { }
                 )
 
-                Text(
-                    text = "Profile",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                Text("Profile", fontSize = 18.sp, fontWeight = FontWeight.Bold)
 
                 Box {
                     Icon(
                         imageVector = Icons.Default.MoreVert,
                         contentDescription = "Menu",
-                        modifier = Modifier
-                            .size(24.dp)
-                            .clickable { menuExpanded = true }
+                        modifier = Modifier.size(24.dp).clickable { menuExpanded = true }
                     )
 
                     DropdownMenu(
@@ -127,57 +116,34 @@ fun ProfileScreen() {
             }
         }
 
-        /* ---------------- PROFILE IMAGE (CENTERED) ---------------- */
+        // ---------------- PROFILE IMAGE ----------------
         item {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
-                contentAlignment = Alignment.Center
-            ) {
-
+            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Image(
                     painter = painterResource(id = R.drawable.icon),
                     contentDescription = "Profile",
-                    modifier = Modifier
-                        .size(125.dp)
-                        .clip(CircleShape),
+                    modifier = Modifier.size(125.dp).clip(CircleShape),
                     contentScale = ContentScale.Crop
                 )
             }
         }
 
-
-        /* ---------------- NAME & BIO ---------------- */
+        // ---------------- NAME & BIO ----------------
         item {
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 14.dp),
+                modifier = Modifier.fillMaxWidth().padding(top = 14.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = userName.ifEmpty { "Loading..." },
-                    fontSize = 30.sp
-
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = userEmail,
-                    fontSize = 15.sp,
-                    color = Color.Gray
-                )
+                Text(userName.ifEmpty { "Loading..." }, fontSize = 30.sp)
+                Spacer(Modifier.height(4.dp))
+                Text(userEmail, fontSize = 15.sp, color = Color.Gray)
             }
         }
 
-        /* ---------------- STATS ---------------- */
+        // ---------------- STATS ----------------
         item {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 24.dp),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 StatLarge("5", "Books Reviewed")
@@ -185,48 +151,25 @@ fun ProfileScreen() {
             }
         }
 
+        item { Divider(color = Color(0xFFEAEAEA), thickness = 1.dp) }
+
+        // ---------------- TABS ----------------
         item {
-            Divider(color = Color(0xFFEAEAEA), thickness = 1.dp)
-        }
-
-        /* ---------------- TABS ---------------- */
-        item {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp)
-            ) {
-
-                TabButton(
-                    text = "Wish List",
-                    selected = selectedTab == 0,
-                    modifier = Modifier.weight(1f)
-                ) { selectedTab = 0 }
-
-                Spacer(modifier = Modifier.width(10.dp))
-
-                TabButton(
-                    text = "My Reviews",
-                    selected = selectedTab == 1,
-                    modifier = Modifier.weight(1f)
-                ) { selectedTab = 1 }
+            Row(Modifier.fillMaxWidth().padding(20.dp)) {
+                TabButton("Wish List", selectedTab == 0, Modifier.weight(1f)) { selectedTab = 0 }
+                Spacer(Modifier.width(10.dp))
+                TabButton("My Reviews", selectedTab == 1, Modifier.weight(1f)) { selectedTab = 1 }
             }
         }
 
-        /* ---------------- CONTENT ---------------- */
+        // ---------------- CONTENT ----------------
         if (selectedTab == 1) {
-
-            val reviews = listOf(1, 2, 3, 4, 5)
-
-            items(reviews) {
+            items(listOf(1, 2, 3, 4, 5)) {
                 ReviewCard()
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(Modifier.height(16.dp))
             }
-
         } else {
-            item {
-                WishListPlaceholder()
-            }
+            item { WishListPlaceholder() }
         }
     }
 
@@ -239,10 +182,7 @@ fun ProfileScreen() {
                 Text("Are you sure you want to deactivate your account? You can reactivate anytime by logging in again.")
             },
             confirmButton = {
-                TextButton(onClick = {
-                    showDeactivateDialog = false
-                    // TODO: Add deactivate logic here
-                }) {
+                TextButton(onClick = { showDeactivateDialog = false }) {
                     Text("Deactivate")
                 }
             },
@@ -253,23 +193,93 @@ fun ProfileScreen() {
             }
         )
     }
-}
 
-/* ---------------- COMPONENTS ---------------- */
+    /* ---------------- DELETE ACCOUNT DIALOG  ---------------- */
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Delete Account") },
+            text = {
+                Column {
+                    Text(
+                        "This will permanently delete your account and all your data. " +
+                                "This action CANNOT be undone.\n\n" +
+                                "Please enter your password to confirm."
+                    )
 
-@Composable
-fun StatMiniButton(value: String, label: String, onClick: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .clip(RoundedCornerShape(10.dp))
-            .clickable { onClick() }
-            .padding(horizontal = 14.dp, vertical = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(value, fontSize = 17.sp, fontWeight = FontWeight.Bold)
-        Text(label, fontSize = 12.sp, color = Color.Gray)
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    OutlinedTextField(
+                        value = deletePassword,
+                        onValueChange = { deletePassword = it },
+                        label = { Text("Password") },
+                        visualTransformation = PasswordVisualTransformation(),
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val currentUser = FirebaseAuth.getInstance().currentUser
+                        val email = currentUser?.email
+
+                        if (currentUser != null && email != null && deletePassword.isNotBlank()) {
+
+                            val credential = EmailAuthProvider
+                                .getCredential(email, deletePassword)
+
+                            // Re-authenticate first
+                            currentUser.reauthenticate(credential)
+                                .addOnCompleteListener { authTask ->
+                                    if (authTask.isSuccessful) {
+
+                                        val uid = currentUser.uid
+
+                                        // Delete DB data
+                                        FirebaseDatabase.getInstance()
+                                            .reference
+                                            .child("users")
+                                            .child(uid)
+                                            .removeValue()
+
+                                        // Delete Auth account
+                                        currentUser.delete()
+                                            .addOnCompleteListener { deleteTask ->
+                                                if (deleteTask.isSuccessful) {
+                                                    showDeleteDialog = false
+                                                    deletePassword = ""
+
+                                                    println("Account deleted successfully")
+                                                    // TODO: Navigate to Login screen
+                                                } else {
+                                                    deleteTask.exception?.printStackTrace()
+                                                }
+                                            }
+
+                                    } else {
+                                        authTask.exception?.printStackTrace()
+                                    }
+                                }
+                        }
+                    }
+                ) {
+                    Text("Delete", color = Color.Red)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showDeleteDialog = false
+                    deletePassword = ""
+                }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
+/* ---------------- COMPONENTS ---------------- */
 
 @Composable
 fun StatLarge(value: String, label: String) {

@@ -234,6 +234,7 @@ fun LoginBody() {
         Spacer(modifier = Modifier.height(30.dp))
 
         // -------- SUBMIT BUTTON --------
+
         Button(
             onClick = {
                 if (email.isEmpty() || password.isEmpty()) {
