@@ -39,7 +39,6 @@ import com.example.sem3project.ui.theme.blue
 import com.example.sem3project.ui.theme.White20
 import com.example.sem3project.ui.theme.box
 
-
 import com.google.firebase.auth.FirebaseAuth
 import android.widget.Toast
 import androidx.compose.foundation.layout.size
@@ -139,7 +138,7 @@ fun Password(viewModel: AuthViewModel = viewModel()) {
                 onClick = {
                     if (email.isNotEmpty()) {
                         isLoading = true
-                        viewModel.forgotPassword(email.trim()) { success, message ->
+                        viewModel.forgetPassword(email.trim()) { success, message ->
                             isLoading = false
                             Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                             if (success) {
@@ -176,4 +175,3 @@ fun Password(viewModel: AuthViewModel = viewModel()) {
         }
     }
 }
-

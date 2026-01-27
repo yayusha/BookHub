@@ -1,31 +1,17 @@
 package com.example.sem3project.view
 
-
 import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import com.example.sem3project.R
 import com.example.sem3project.ui.theme.White20
 import com.example.sem3project.ui.theme.green20
@@ -39,89 +25,97 @@ class UserDashboard : ComponentActivity() {
         }
     }
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashboardBody(){
+fun DashboardBody() {
+
     val context = LocalContext.current
     val activity = context as Activity
 
+    data class NavItem(val label: String, val icon: Int)
 
-    data class NavItem(val label: String,val icon: Int)
     var selectedIndex by remember { mutableStateOf(0) }
+    var showSearch by remember { mutableStateOf(false) }
+    var searchText by remember { mutableStateOf("") }
 
     val listItems = listOf(
-        NavItem(label = "Home", R.drawable.baseline_home_24),
-        NavItem(label = "Notification", R.drawable.baseline_notifications_24),
-        NavItem(label = "Profile", R.drawable.baseline_person_24),
+        NavItem("Home", R.drawable.baseline_home_24),
+        NavItem("Notification", R.drawable.baseline_notifications_24),
+        NavItem("Profile", R.drawable.baseline_person_24)
+    )
 
-        )
     Scaffold(
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
-                    navigationIconContentColor = White20,
-                    actionIconContentColor = White20,
+                    containerColor = green20,
                     titleContentColor = White20,
-                    containerColor = green20
+                    navigationIconContentColor = White20,
+                    actionIconContentColor = White20
                 ),
-                title = {Text("BookHub")},
+                title = { Text("BookHub") },
+
                 navigationIcon = {
-                    IconButton(onClick = {}) {
+                    IconButton(onClick = { }) {
                         Icon(
                             painter = painterResource(R.drawable.baseline_menu_24),
-                            contentDescription = null
+                            contentDescription = "Menu"
                         )
                     }
                 },
-                actions = {
-                    IconButton(onClick = {}) {
-                        Icon(
-                            painter = painterResource(R.drawable.baseline_search_24),
-                            contentDescription = null
-                        )
-                    }
 
-                }
+
             )
         },
+
         bottomBar = {
             NavigationBar {
-                listItems.forEachIndexed { index, item->
+                listItems.forEachIndexed { index, item ->
                     NavigationBarItem(
+                        selected = selectedIndex == index,
+                        onClick = {
+                            selectedIndex = index
+                            showSearch = false
+                        },
                         icon = {
                             Icon(
                                 painter = painterResource(item.icon),
-                                contentDescription = null
+                                contentDescription = item.label
                             )
                         },
-                        label = {
-                            Text(item.label)
-                        },
-                        onClick = {
-                            selectedIndex = index
-                        },
-                        selected = selectedIndex == index
+                        label = { Text(item.label) }
                     )
                 }
             }
         }
 
-    ) {padding->
-        Column (
-            modifier = Modifier.fillMaxSize().padding(padding)
-        ){
-            when(selectedIndex){
-                0 -> HomeScreen()
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+
+            // 🔍 SEARCH BAR (Only visible when search icon clicked)
+            if (showSearch && selectedIndex == 0) {
+                OutlinedTextField(
+                    value = searchText,
+                    onValueChange = { searchText = it },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp),
+                    label = { Text("Search books...") },
+                    singleLine = true
+                )
+            }
+
+            when (selectedIndex) {
+                0 -> Homescreen()
                 1 -> NotificationScreen()
                 2 -> ProfileScreen()
-                else -> HomeScreen()
+                else -> {}
             }
         }
     }
-}
-
-@Composable
-fun HomeScreen(){
-    Text(text = "Home Screen")
-
 }

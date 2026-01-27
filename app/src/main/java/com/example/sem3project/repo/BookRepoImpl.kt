@@ -1,52 +1,32 @@
 package com.example.sem3project.repo
 
 import com.example.sem3project.model.BookModel
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
-import kotlin.jvm.java
+import com.google.firebase.database.*
 
+class BookRepoImpl : BookRepo {
 
-class BookRepoImpl: BookRepo {
-    val database: FirebaseDatabase = FirebaseDatabase.getInstance()
+    private val database: FirebaseDatabase = FirebaseDatabase.getInstance()
+    private val ref: DatabaseReference = database.getReference("Books")
 
-    val ref: DatabaseReference = database.getReference("Books")
-
-    override fun addBook(
-        model: BookModel,
-        callback: (Boolean, String) -> Unit
-    ) {
-        var id = ref.push().key.toString()
-
+    // 1️⃣ Add a book
+    override fun addBook(model: BookModel, callback: (Boolean, String) -> Unit) {
+        val id = ref.push().key.toString()
         model.bookId = id
-
         ref.child(id).setValue(model).addOnCompleteListener {
-            if (it.isSuccessful) {
-                callback(true, "Book add successfully")
-            } else {
-                callback(false, "${it.exception?.message}")
-            }
+            if (it.isSuccessful) callback(true, "Book added successfully")
+            else callback(false, it.exception?.message ?: "Failed to add book")
         }
-
     }
 
-    override fun getAllBooks
-                (callback: (Boolean, String, List<BookModel>) -> Unit)
-    {
-        ref.addValueEventListener(object : ValueEventListener {
+    // 2️⃣ Get all books
+    override fun getAllBooks(callback: (Boolean, String, List<BookModel>) -> Unit) {
+        ref.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                if (snapshot.exists()) {
-                    var allBook = mutableListOf<BookModel>()
-                    for (data in snapshot.children) {
-                        var book = data.getValue(BookModel::class.java)
-                        if (book != null) {
-                            allBook.add(book)
-                        }
-                    }
-                    callback(true, "Book fetched", allBook)
+                val books = mutableListOf<BookModel>()
+                for (data in snapshot.children) {
+                    data.getValue(BookModel::class.java)?.let { books.add(it) }
                 }
+                callback(true, "Books fetched", books)
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -55,73 +35,47 @@ class BookRepoImpl: BookRepo {
         })
     }
 
-
-    override fun getBookById(
-        bookID: String,
-        callback: (Boolean, String, BookModel?) -> Unit
-    ) {
-        ref.child(bookID).addValueEventListener(object : ValueEventListener {
+    // 3️⃣ Get book by ID
+    override fun getBookById(bookID: String, callback: (Boolean, String, BookModel?) -> Unit) {
+        ref.child(bookID).addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                if (snapshot.exists()) {
-                    var data = snapshot.getValue(BookModel::class.java)
-                    if (data != null) {
-                        callback(true, "Book fetched", data)
-                    }
-                }
+                val book = snapshot.getValue(BookModel::class.java)
+                if (book != null) callback(true, "Book fetched", book)
+                else callback(false, "Book not found", null)
             }
 
             override fun onCancelled(error: DatabaseError) {
                 callback(false, error.message, null)
             }
         })
-
     }
 
-    override fun updateBook(
-        model: BookModel,
-        callback: (Boolean, String) -> Unit
-    ) {
+    // 4️⃣ Update book
+    override fun updateBook(model: BookModel, callback: (Boolean, String) -> Unit) {
         ref.child(model.bookId).updateChildren(model.toMap()).addOnCompleteListener {
-            if (it.isSuccessful) {
-                callback(true, "Book updated successfully")
-            } else {
-                callback(false, "${it.exception?.message}")
-            }
+            if (it.isSuccessful) callback(true, "Book updated successfully")
+            else callback(false, it.exception?.message ?: "Failed to update book")
         }
-
     }
 
-    override fun deleteBook(
-        bookID: String,
-        callback: (Boolean, String) -> Unit
-    ) {
+    // 5️⃣ Delete book
+    override fun deleteBook(bookID: String, callback: (Boolean, String) -> Unit) {
         ref.child(bookID).removeValue().addOnCompleteListener {
-            if (it.isSuccessful) {
-                callback(true, "Book deleted successfully")
-            } else {
-                callback(false, "${it.exception?.message}")
-            }
+            if (it.isSuccessful) callback(true, "Book deleted successfully")
+            else callback(false, it.exception?.message ?: "Failed to delete book")
         }
-
     }
 
-    override fun getBookByGenre(
-        genreId: String,
-        callback: (Boolean, String, List<BookModel>?) -> Unit
-    ) {
+    // 6️⃣ Get books by genre
+    override fun getBookByGenre(genreId: String, callback: (Boolean, String, List<BookModel>?) -> Unit) {
         ref.orderByChild("genreId").equalTo(genreId)
-            .addValueEventListener(object : ValueEventListener {
+            .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    if (snapshot.exists()) {
-                        var allBooks = mutableListOf<BookModel>()
-                        for (data in snapshot.children) {
-                            var book = data.getValue(BookModel::class.java)
-                            if (book != null) {
-                                allBooks.add(book)
-                            }
-                        }
-                        callback(true, "Books fetched", allBooks)
+                    val books = mutableListOf<BookModel>()
+                    for (data in snapshot.children) {
+                        data.getValue(BookModel::class.java)?.let { books.add(it) }
                     }
+                    callback(true, "Books fetched by genre", books)
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -129,5 +83,4 @@ class BookRepoImpl: BookRepo {
                 }
             })
     }
-
 }
