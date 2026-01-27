@@ -6,13 +6,17 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.sem3project.model.ReviewModel
 import com.example.sem3project.viewmodel.ReviewViewModel
+import com.example.sem3project.ui.theme.green20
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -146,11 +150,14 @@ fun ReviewCard(
     review: ReviewModel,
     onDeleteClick: () -> Unit
 ) {
+    // Local state to track if review is resolved (frontend only)
+    var isResolved by remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = green20
         )
     ) {
         Column(
@@ -158,31 +165,68 @@ fun ReviewCard(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            // Header with book title and delete button
+            // Header with book title and action buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = review.title,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = review.title,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = Color.White
+                        )
+                        // Show "Resolved" badge when marked as resolved
+                        if (isResolved) {
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Surface(
+                                color = Color(0xFF4CAF50),
+                                shape = MaterialTheme.shapes.small
+                            ) {
+                                Text(
+                                    text = "Resolved",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Color.White,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                )
+                            }
+                        }
+                    }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "by ${review.date}",
+                        text = "on ${review.date}",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = Color.LightGray
                     )
                 }
-                IconButton(onClick = onDeleteClick) {
-                    Icon(
-                        Icons.Default.Delete,
-                        contentDescription = "Delete review",
-                        tint = MaterialTheme.colorScheme.error
-                    )
+
+
+                Row {
+                    // Resolve/Unresolve button
+                    IconButton(
+                        onClick = {
+                            isResolved = !isResolved
+                        }
+                    ) {
+                        Icon(
+                            imageVector = if (isResolved) Icons.Filled.CheckCircle else Icons.Outlined.CheckCircle,
+                            contentDescription = if (isResolved) "Mark as unresolved" else "Mark as resolved",
+                            tint = if (isResolved) Color(0xFF4CAF50) else Color.White
+                        )
+                    }
+
+                    // Delete button
+                    IconButton(onClick = onDeleteClick) {
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = "Delete review",
+                            tint = Color.White
+                        )
+                    }
                 }
             }
 
@@ -198,7 +242,7 @@ fun ReviewCard(
                 Text(
                     text = String.format("%.1f/5.0", review.rating),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = Color.White
                 )
             }
 
@@ -209,13 +253,10 @@ fun ReviewCard(
                 Text(
                     text = review.content,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = Color.LightGray
                 )
                 Spacer(modifier = Modifier.height(12.dp))
             }
-
-
         }
     }
 }
-

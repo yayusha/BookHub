@@ -38,6 +38,7 @@ import coil.request.ImageRequest
 import com.example.sem3project.R
 import com.example.sem3project.model.BookModel
 import com.example.sem3project.repo.BookRepoImpl
+import com.example.sem3project.ui.theme.White20
 import com.example.sem3project.ui.theme.green20
 import com.example.sem3project.viewmodel.BookViewModel
 import com.example.sem3project.viewmodel.ReviewViewModel
@@ -167,7 +168,7 @@ fun DrawerContent(
         // Menu Items
         DrawerMenuItem(
             icon = Icons.Default.Home,
-            label = "HomeScreen",
+            label = "Dashboard",
             selected = currentScreen == AdminScreen.BOOK_LIST,
             onClick = { onNavigate(AdminScreen.BOOK_LIST) }
         )
