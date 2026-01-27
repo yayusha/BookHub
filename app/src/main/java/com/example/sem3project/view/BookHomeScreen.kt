@@ -20,6 +20,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,15 +40,27 @@ import com.example.sem3project.model.BookModel
 import com.example.sem3project.repo.BookRepoImpl
 import com.example.sem3project.ui.theme.green20
 import com.example.sem3project.viewmodel.BookViewModel
+import com.example.sem3project.viewmodel.ReviewViewModel
 import kotlinx.coroutines.launch
+
+// Navigation destinations enum
+enum class AdminScreen {
+    BOOK_LIST,
+    REPORTED_REVIEWS,
+    SETTINGS
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookHomeScreen() {
     val bookViewModel: BookViewModel = remember { BookViewModel(BookRepoImpl()) }
+    val reviewViewModel: ReviewViewModel = viewModel()
     val bookList by bookViewModel.allBooks.observeAsState(initial = emptyList())
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+
+    // State to track current screen
+    var currentScreen by remember { mutableStateOf(AdminScreen.BOOK_LIST) }
 
     LaunchedEffect(Unit) {
         bookViewModel.getAllProduct()
@@ -58,83 +72,66 @@ fun BookHomeScreen() {
             ModalDrawerSheet(
                 drawerContainerColor = Color.White
             ) {
-                DrawerContent()
+                DrawerContent(
+                    currentScreen = currentScreen,
+                    onNavigate = { screen ->
+                        currentScreen = screen
+                        scope.launch {
+                            drawerState.close()
+                        }
+                    },
+                    onLogout = {
+                        // Handle logout
+                        scope.launch {
+                            drawerState.close()
+                        }
+                    }
+                )
             }
         }
     ) {
-        Scaffold(
-            topBar = {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(green20)
-                        .padding(top = 32.dp, bottom = 12.dp, start = 8.dp, end = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    IconButton(onClick = {
+        // Show different screens based on currentScreen state
+        when (currentScreen) {
+            AdminScreen.BOOK_LIST -> {
+                BookListScreen(
+                    bookList = bookList,
+                    bookViewModel = bookViewModel,
+                    onMenuClick = {
                         scope.launch {
                             drawerState.open()
                         }
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.Menu,
-                            contentDescription = "Menu",
-                            tint = Color.White,
-                            modifier = Modifier.size(30.dp)
-                        )
                     }
-                    Text("Admin Dashboard", color = Color.White, fontWeight = FontWeight.Bold)
-
-                    IconButton(onClick = { /* TODO: Search */ }) {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "Search",
-                            tint = Color.White,
-                            modifier = Modifier.size(30.dp)
-                        )
-                    }
-                }
-            },
-            floatingActionButton = {
-                FloatingActionButton(
-                    onClick = { /* TODO: Navigate to Add Book */ },
-                    containerColor = Color(0xFFEADDFF),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Add",
-                        tint = Color.Black
-                    )
-                }
+                )
             }
-        ) { innerPadding ->
-            val displayList = bookList ?: emptyList()
-
-            if (displayList.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = green20)
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(12.dp)
-                ) {
-                    items(displayList) { item ->
-                        BookCardUI(book = item, viewModel = bookViewModel)
+            AdminScreen.REPORTED_REVIEWS -> {
+                ReviewScreen(
+                    viewModel = reviewViewModel,
+                    onMenuClick = {
+                        scope.launch {
+                            drawerState.open()
+                        }
                     }
-                }
+                )
+            }
+            AdminScreen.SETTINGS -> {
+                SettingsScreen(
+                    onMenuClick = {
+                        scope.launch {
+                            drawerState.open()
+                        }
+                    }
+                )
             }
         }
     }
 }
 
 @Composable
-fun DrawerContent() {
+fun DrawerContent(
+    currentScreen: AdminScreen,
+    onNavigate: (AdminScreen) -> Unit,
+    onLogout: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -168,23 +165,34 @@ fun DrawerContent() {
         Spacer(modifier = Modifier.height(16.dp))
 
         // Menu Items
+        DrawerMenuItem(
+            icon = Icons.Default.Home,
+            label = "HomeScreen",
+            selected = currentScreen == AdminScreen.BOOK_LIST,
+            onClick = { onNavigate(AdminScreen.BOOK_LIST) }
+        )
 
         DrawerMenuItem(
             icon = Icons.Default.Star,
             label = "View reported reviews",
-            onClick = { /* TODO: Navigate to reported reviews */ }
+            selected = currentScreen == AdminScreen.REPORTED_REVIEWS,
+            onClick = { onNavigate(AdminScreen.REPORTED_REVIEWS) }
         )
 
         DrawerMenuItem(
             icon = Icons.Default.Settings,
             label = "Settings",
-            onClick = { /* TODO: Navigate to Settings */ }
+            selected = currentScreen == AdminScreen.SETTINGS,
+            onClick = { onNavigate(AdminScreen.SETTINGS) }
         )
+
+        Spacer(modifier = Modifier.weight(1f))
 
         DrawerMenuItem(
             icon = Icons.Default.Lock,
             label = "Logout",
-            onClick = { /* TODO: Navigate to Settings */ }
+            selected = false,
+            onClick = onLogout
         )
     }
 }
@@ -193,6 +201,7 @@ fun DrawerContent() {
 fun DrawerMenuItem(
     icon: ImageVector,
     label: String,
+    selected: Boolean = false,
     onClick: () -> Unit
 ) {
     NavigationDrawerItem(
@@ -200,23 +209,156 @@ fun DrawerMenuItem(
             Icon(
                 imageVector = icon,
                 contentDescription = label,
-                tint = green20
+                tint = if (selected) Color.White else green20
             )
         },
         label = {
             Text(
                 text = label,
-                fontSize = 16.sp
+                fontSize = 16.sp,
+                color = if (selected) Color.White else Color.Black
             )
         },
-        selected = false,
+        selected = selected,
         onClick = onClick,
         modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
         colors = NavigationDrawerItemDefaults.colors(
             unselectedContainerColor = Color.Transparent,
-            selectedContainerColor = green20.copy(alpha = 0.1f)
+            selectedContainerColor = green20
         )
     )
+}
+
+// Separate composable for the book list screen
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BookListScreen(
+    bookList: List<BookModel>?,
+    bookViewModel: BookViewModel,
+    onMenuClick: () -> Unit
+) {
+    Scaffold(
+        topBar = {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(green20)
+                    .padding(top = 32.dp, bottom = 12.dp, start = 8.dp, end = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                IconButton(onClick = onMenuClick) {
+                    Icon(
+                        imageVector = Icons.Default.Menu,
+                        contentDescription = "Menu",
+                        tint = Color.White,
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
+                Text("Admin Dashboard", color = Color.White, fontWeight = FontWeight.Bold)
+
+                IconButton(onClick = { /* TODO: Search */ }) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Search",
+                        tint = Color.White,
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
+            }
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { /* TODO: Navigate to Add Book */ },
+                containerColor = Color(0xFFEADDFF),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add",
+                    tint = Color.Black
+                )
+            }
+        }
+    ) { innerPadding ->
+        val displayList = bookList ?: emptyList()
+
+        if (displayList.isEmpty()) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = green20)
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(12.dp)
+            ) {
+                items(displayList) { item ->
+                    BookCardUI(book = item, viewModel = bookViewModel)
+                }
+            }
+        }
+    }
+}
+
+// Placeholder Settings Screen
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SettingsScreen(
+    onMenuClick: () -> Unit
+) {
+    Scaffold(
+        topBar = {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(green20)
+                    .padding(top = 32.dp, bottom = 12.dp, start = 8.dp, end = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                IconButton(onClick = onMenuClick) {
+                    Icon(
+                        imageVector = Icons.Default.Menu,
+                        contentDescription = "Menu",
+                        tint = Color.White,
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
+                Text("Settings", color = Color.White, fontWeight = FontWeight.Bold)
+
+                // Empty space to balance the layout
+                Spacer(modifier = Modifier.size(48.dp))
+            }
+        }
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "Settings",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = green20,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Settings content will be added here",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Color.Gray
+                )
+            }
+        }
+    }
 }
 
 @Composable

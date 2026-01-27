@@ -67,6 +67,4 @@ class ReviewViewModel(val repo: ReviewRepo= ReviewRepoImpl()): ViewModel() {
         _deleteStatus.value = null
     }
 
-
-
 }
