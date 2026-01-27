@@ -18,7 +18,7 @@ object NotificationHelper {
     private const val CHANNEL_NAME = "Book Updates"
     private const val CHANNEL_DESCRIPTION = "Notifications for new books added"
 
-    // Create notification channel (required for Android 8.0+)
+    // Create notification channel
     fun createNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val importance = NotificationManager.IMPORTANCE_DEFAULT

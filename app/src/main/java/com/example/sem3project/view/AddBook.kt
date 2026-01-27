@@ -62,7 +62,7 @@ class AddBook : ComponentActivity() {
         val notificationPermissionLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestPermission()
         ) { isGranted ->
-            // Handle permission result if needed
+
         }
         LaunchedEffect(Unit) {
             NotificationHelper.createNotificationChannel(context)
