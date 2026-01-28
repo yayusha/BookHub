@@ -56,9 +56,11 @@ class AuthViewModel(val repo: AuthRepo = AuthRepoImpl()) : ViewModel() {
             if (success) {
                 _users.postValue(data)
             }
-        }
+        }git
     }
-        fun forgotPassword(email: String, callback: (Boolean, String) -> Unit) {
-            repo.forgotPassword(email, callback)
-        }
+
+    fun forgotPassword(email: String, callback: (Boolean, String) -> Unit) {
+        repo.forgotPassword(email, callback)
+    }
+}
 

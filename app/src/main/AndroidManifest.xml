@@ -9,7 +9,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Sen3Project">
+        android:theme="@style/Theme.Sem3Project">
 
         <activity
             android:name=".view.LoginActivity"

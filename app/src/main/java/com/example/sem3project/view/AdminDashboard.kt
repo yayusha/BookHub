@@ -1,3 +1,5 @@
+package com.example.sem3project.view
+
 import com.example.sem3project.R
 import android.app.Activity
 import android.content.Intent
