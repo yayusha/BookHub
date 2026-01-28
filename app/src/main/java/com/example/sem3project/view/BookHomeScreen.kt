@@ -1,5 +1,6 @@
 package com.example.sem3project.view
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -236,6 +237,7 @@ fun BookListScreen(
     bookViewModel: BookViewModel,
     onMenuClick: () -> Unit
 ) {
+    val context = LocalContext.current
     var showDeleteDialog by remember { mutableStateOf(false) }
     var bookToDelete by remember { mutableStateOf<BookModel?>(null) }
 
@@ -271,15 +273,14 @@ fun BookListScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { /* TODO: Navigate to Add Book */ },
+                onClick = {
+                    val intent = Intent(context, AddBook::class.java)
+                    context.startActivity(intent)
+                },
                 containerColor = Color(0xFFEADDFF),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Add",
-                    tint = Color.Black
-                )
+                Icon(Icons.Default.Add, contentDescription = "Add", tint = Color.Black)
             }
         }
     ) { innerPadding ->

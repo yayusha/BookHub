@@ -54,14 +54,6 @@ fun DashBody() {
     )
 
     Scaffold(
-        floatingActionButton = {
-            FloatingActionButton(onClick = {
-                val intent = Intent(context, AddBook::class.java)
-                context.startActivity(intent)
-            }) {
-                Icon(Icons.Default.Add, contentDescription = null)
-            }
-        },
         bottomBar = {
             NavigationBar {
                 listItems.forEachIndexed { index, item ->
