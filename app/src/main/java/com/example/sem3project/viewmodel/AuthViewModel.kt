@@ -19,34 +19,34 @@ class AuthViewModel(val repo: AuthRepo = AuthRepoImpl()) : ViewModel() {
     fun addUserToDatabase(
         userId: String, model: UserModel,
         callback: (Boolean, String) -> Unit
-    ){
-        repo.addUserToDatabase(userId,model,callback)
+    ) {
+        repo.addUserToDatabase(userId, model, callback)
     }
 
     fun forgetPassword(
         email: String,
         callback: (Boolean, String) -> Unit
-    ){
-        repo.forgotPassword(email,callback)
+    ) {
+        repo.forgotPassword(email, callback)
     }
 
-    fun deleteAccount(userId: String, callback: (Boolean, String) -> Unit){
-        repo.deleteAccount(userId,callback)
+    fun deleteAccount(userId: String, callback: (Boolean, String) -> Unit) {
+        repo.deleteAccount(userId, callback)
     }
 
     fun editProfile(
         userId: String, model: UserModel,
         callback: (Boolean, String) -> Unit
-    ){
-        repo.editProfile(userId,model,callback)
+    ) {
+        repo.editProfile(userId, model, callback)
     }
 
     private val _users = MutableLiveData<UserModel?>()
-    val users : MutableLiveData<UserModel?>
+    val users: MutableLiveData<UserModel?>
         get() = _users
 
     private val _allUsers = MutableLiveData<List<UserModel>?>()
-    val allUsers : MutableLiveData<List<UserModel>?>
+    val allUsers: MutableLiveData<List<UserModel>?>
         get() = _allUsers
 
     fun getUserById(
@@ -57,6 +57,9 @@ class AuthViewModel(val repo: AuthRepo = AuthRepoImpl()) : ViewModel() {
                 _users.postValue(data)
             }
         }
-    }
+        fun forgotPassword(email: String, callback: (Boolean, String) -> Unit) {
+            repo.forgotPassword(email, callback)
+        }
 
+    }
 }

@@ -37,7 +37,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sem3project.ui.theme.*
 
-
 import com.google.firebase.auth.FirebaseAuth
 import android.widget.Toast
 import androidx.compose.foundation.layout.size
@@ -174,4 +173,3 @@ fun Password(viewModel: AuthViewModel = viewModel()) {
         }
     }
 }
-
