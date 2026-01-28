@@ -53,7 +53,7 @@ fun DashBody() {
 
     val listItems = listOf(
         NavItem(label = "Home", R.drawable.baseline_home_24),
-        NavItem(label = "User", R.drawable.baseline_notifications_24),
+        NavItem(label = "Notification", R.drawable.baseline_notifications_24),
         NavItem(label = "Profile", R.drawable.baseline_person_24),
     )
 
@@ -90,10 +90,10 @@ fun DashBody() {
                 .padding(padding)
         ) {
             when (selectedIndex) {
-                0 -> Homescreen()
+                0 -> HomeScreen()
                 1 -> NotificationScreen()
                 2 -> ProfileScreen()
-                else -> Homescreen()
+                else -> HomeScreen()
             }
         }
     }

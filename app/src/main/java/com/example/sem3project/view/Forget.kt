@@ -35,9 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.sem3project.ui.theme.blue
-import com.example.sem3project.ui.theme.White20
-import com.example.sem3project.ui.theme.box
+import com.example.sem3project.ui.theme.*
 
 import com.google.firebase.auth.FirebaseAuth
 import android.widget.Toast

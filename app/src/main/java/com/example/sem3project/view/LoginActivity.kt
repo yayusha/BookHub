@@ -112,7 +112,7 @@ fun LoginBody() {
 
         // -------- USERNAME/EMAIL LABEL --------
         Text(
-            "USERNAME/EMAIL",
+            "EMAIL",
             style = TextStyle(
                 fontSize = 12.sp,
                 color = Color.Gray,
@@ -127,7 +127,7 @@ fun LoginBody() {
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
-            placeholder = { Text("your_username or email", color = Color.LightGray) },
+            placeholder = { Text("Enter your email", color = Color.LightGray) },
             modifier = Modifier
                 .fillMaxWidth()
                 .onFocusChanged { isEmailFocused = it.isFocused },
@@ -235,26 +235,32 @@ fun LoginBody() {
         // -------- SUBMIT BUTTON --------
         Button(
             onClick = {
-                if (email.isEmpty() || password.isEmpty()) {
-                    Toast.makeText(context, "Email and password required", Toast.LENGTH_SHORT)
-                        .show()
+                // TRIM THE STRINGS HERE
+                val cleanEmail = email.trim()
+                val cleanPassword = password.trim()
+
+                if (cleanEmail.isEmpty() || cleanPassword.isEmpty()) {
+                    Toast.makeText(context, "Email and password required", Toast.LENGTH_SHORT).show()
                     return@Button
                 }
 
-                auth.signInWithEmailAndPassword(email, password)
+                // Use cleanEmail for pattern checking
+                if (!android.util.Patterns.EMAIL_ADDRESS.matcher(cleanEmail).matches()) {
+                    Toast.makeText(context, "Enter a valid email address", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
+
+                // Use cleanEmail and cleanPassword for Firebase
+                auth.signInWithEmailAndPassword(cleanEmail, cleanPassword)
                     .addOnSuccessListener {
                         Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
-
-                        val intent = Intent(context, MainActivity::class.java)
+                        val intent = Intent(context, UserDashboard::class.java)
                         context.startActivity(intent)
                     }
                     .addOnFailureListener {
-                        Toast.makeText(
-                            context,
-                            it.message ?: "Login failed",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Toast.makeText(context, it.message ?: "Login failed", Toast.LENGTH_SHORT).show()
                     }
+
             },
             modifier = Modifier
                 .fillMaxWidth()
