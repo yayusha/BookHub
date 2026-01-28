@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items // Added for cleaner list handling
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -27,9 +28,7 @@ fun Homescreen() {
     var selectedGenre by remember { mutableStateOf("All") }
     val genres = listOf("All", "Fiction", "Romance", "Mystery", "Self-help", "Finance")
 
-    // ✅ All books list
     val allBooks = listOf(
-
         // Existing
         BookModel("1", "The Alchemist", "Paulo Coelho", "Fiction", "A story about destiny", "book1"),
         BookModel("2", "Atomic Habits", "James Clear", "Self-help", "Guide to building habits", "book2"),
@@ -54,13 +53,12 @@ fun Homescreen() {
         BookModel("16", "The Power of Now", "Eckhart Tolle", "Self-help", "Spiritual self-help on mindfulness and presence", "book16")
     )
 
-    // ✅ Filter books by genre + search
+    // Filter books by genre + search
     val filteredBooks = allBooks.filter {
         (selectedGenre == "All" || it.genreId == selectedGenre) &&
                 (searchQuery.isBlank() || it.bookName.contains(searchQuery, ignoreCase = true) || it.author.contains(searchQuery, ignoreCase = true))
     }
 
-    // ✅ Whole screen scrollable
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -99,57 +97,36 @@ fun Homescreen() {
             }
         }
 
+        // Section Header
         item {
-            BookCard(
-                title = "$selectedGenre Books",
-                books = filteredBooks
-            )
-        }
-    }
-}
-
-@Composable
-fun BookCard(
-    title: String,
-    books: List<BookModel>
-) {
-    Card(
-        shape = RoundedCornerShape(16.dp),
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = title,
+                text = "$selectedGenre Books",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(bottom = 12.dp)
+                modifier = Modifier.padding(top = 8.dp)
             )
+        }
 
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(books.size) { index ->
-                    val book = books[index]
-                    BookItem(
-                        cover = when (book.imageUrl) {
-                            "book1" -> R.drawable.book1
-                            "book2" -> R.drawable.book2
-                            "book3" -> R.drawable.book3
-                            "book4" -> R.drawable.book4
-                            "book6" -> R.drawable.book6
-                            "book7" -> R.drawable.book7
-                            "book10" -> R.drawable.book10
-                            "book11" -> R.drawable.book11
-                            "book12" -> R.drawable.book12
-                            "book14" -> R.drawable.book14
-                            "book16" -> R.drawable.book16
-
-                            else -> R.drawable.book1
-                        },
-                        title = book.bookName,
-                        author = book.author
-                    )
-                }
-            }
+        //Using items directly inside the main LazyColumn to avoid nesting crash
+        items(filteredBooks) { book ->
+            BookItem(
+                cover = when (book.imageUrl) {
+                    "book1" -> R.drawable.book1
+                    "book2" -> R.drawable.book2
+                    "book3" -> R.drawable.book3
+                    "book4" -> R.drawable.book4
+                    "book6" -> R.drawable.book6
+                    "book7" -> R.drawable.book7
+                    "book10" -> R.drawable.book10
+                    "book11" -> R.drawable.book11
+                    "book12" -> R.drawable.book12
+                    "book14" -> R.drawable.book14
+                    "book16" -> R.drawable.book16
+                    else -> R.drawable.book1
+                },
+                title = book.bookName,
+                author = book.author
+            )
         }
     }
 }
@@ -160,25 +137,35 @@ fun BookItem(
     title: String,
     author: String
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Image(
-            painter = painterResource(id = cover),
-            contentDescription = title,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .size(width = 55.dp, height = 75.dp)
-                .clip(RoundedCornerShape(8.dp))
-        )
-
-        Spacer(modifier = Modifier.width(12.dp))
-
-        Column {
-            Text(text = title, fontWeight = FontWeight.Medium)
-            Text(
-                text = author,
-                fontSize = 13.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+    // Card wrapper for styling
+    Card(
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(12.dp)
+        ) {
+            Image(
+                painter = painterResource(id = cover),
+                contentDescription = title,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(width = 55.dp, height = 75.dp)
+                    .clip(RoundedCornerShape(8.dp))
             )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Column {
+                Text(text = title, fontWeight = FontWeight.Medium)
+                Text(
+                    text = author,
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }

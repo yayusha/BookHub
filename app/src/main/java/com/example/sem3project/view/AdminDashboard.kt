@@ -90,10 +90,10 @@ fun DashBody() {
                 .padding(padding)
         ) {
             when (selectedIndex) {
-                0 -> HomeScreen()
+                0 -> Homescreen()
                 1 -> NotificationScreen()
                 2 -> ProfileScreen()
-                else -> HomeScreen()
+                else -> Homescreen()
             }
         }
     }

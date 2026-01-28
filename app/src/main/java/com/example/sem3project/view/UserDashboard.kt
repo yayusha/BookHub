@@ -91,30 +91,31 @@ fun DashboardBody() {
         }
 
     ) { paddingValues ->
-        Column(
+        // prevent "Infinite Height" layout issues
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-
-            // 🔍 SEARCH BAR (Only visible when search icon clicked)
-            if (showSearch && selectedIndex == 0) {
-                OutlinedTextField(
-                    value = searchText,
-                    onValueChange = { searchText = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(12.dp),
-                    label = { Text("Search books...") },
-                    singleLine = true
-                )
-            }
-
             when (selectedIndex) {
-                0 -> Homescreen()
+                0 -> {
+                    Column {
+                        if (showSearch) {
+                            OutlinedTextField(
+                                value = searchText,
+                                onValueChange = { searchText = it },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp),
+                                label = { Text("Search books...") },
+                                singleLine = true
+                            )
+                        }
+                        Homescreen()
+                    }
+                }
                 1 -> NotificationScreen()
                 2 -> ProfileScreen()
-                else -> {}
             }
         }
     }
