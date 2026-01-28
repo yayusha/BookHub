@@ -13,7 +13,7 @@
 
         <!-- Launcher Activity -->
         <activity
-            android:name=".view.SplashActivity"
+            android:name=".view.AdminDashboard"
             android:exported="true"
             android:label="@string/title_activity_splash"
             android:theme="@style/Theme.Sem3Project">
@@ -39,7 +39,7 @@
             android:name=".view.UserDashboard"
             android:exported="true" />
         <activity
-            android:name=".view.AdminDashboard"
+            android:name=".view.SplashActivity"
             android:exported="true"
             android:label="@string/title_activity_admin_dashboard" />
 

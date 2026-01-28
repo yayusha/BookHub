@@ -44,8 +44,13 @@ fun UserScreen(adminViewModel: AdminViewModel = viewModel()) {
         if (users.isEmpty()) {
             Text("No users found", style = MaterialTheme.typography.bodyMedium)
         } else {
+
+            // Filter the list to exclude anyone with the "admin" role
+            val filteredUsers = users.filter {
+                !it.role.equals("admin", ignoreCase = true)
+            }
             LazyColumn {
-                items(users) { user ->
+                items(filteredUsers) { user ->
                     UserItem(user = user, adminViewModel = adminViewModel)
                 }
             }

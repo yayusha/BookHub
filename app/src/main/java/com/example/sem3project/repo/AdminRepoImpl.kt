@@ -8,7 +8,7 @@ class AdminRepoImpl : AdminRepo {
     private val userDb = FirebaseDatabase.getInstance().getReference("Users") // or your users path
 
     override fun fetchAllUsers(callback: (List<UserModel>) -> Unit) {
-        userDb.addListenerForSingleValueEvent(object : ValueEventListener {
+        userDb.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val users = snapshot.children.mapNotNull { data ->
                     data.getValue(UserModel::class.java)?.copy(userId = data.key ?: "")
@@ -17,6 +17,7 @@ class AdminRepoImpl : AdminRepo {
             }
 
             override fun onCancelled(error: DatabaseError) {
+                // If the user is deleted or permission is lost, this triggers
                 callback(emptyList())
             }
         })

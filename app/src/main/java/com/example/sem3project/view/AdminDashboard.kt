@@ -46,9 +46,11 @@ fun DashBody() {
     var selectedIndex by remember { mutableStateOf(0) }
 
     val listItems = listOf(
-        NavItem(label = "Home", R.drawable.baseline_home_24),
+        NavItem(label = "Books", R.drawable.baseline_book_24),
+        NavItem(label = "Reviews", R.drawable.baseline_star_rate_24),
         NavItem(label = "Users", R.drawable.baseline_notifications_24),
         NavItem(label = "Profile", R.drawable.baseline_person_24),
+
     )
 
     Scaffold(
@@ -84,13 +86,11 @@ fun DashBody() {
                 .padding(padding)
         ) {
             when (selectedIndex) {
-                0 -> ReviewScreen(
-                    viewModel = reviewViewModel,
-                    onMenuClick = { /* Handle drawer if needed */ }
-                )
-                1 -> UserScreen()
-                2 -> AdminProfileScreen()
-                else -> Homescreen()
+                0 -> BookHomeScreen()
+                1 -> ReviewScreen(viewModel = reviewViewModel, onMenuClick = {})
+                2 -> UserScreen()
+                3 -> AdminProfileScreen()
+                else -> BookHomeScreen()
             }
         }
     }
