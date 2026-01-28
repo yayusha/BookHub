@@ -19,6 +19,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.sem3project.R
 import com.example.sem3project.viewmodel.AdminViewModel
+import com.example.sem3project.viewmodel.ReviewViewModel
 
 class AdminDashboard : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,8 +37,9 @@ fun DashBody() {
     val context = LocalContext.current
     val activity = context as Activity
 
-    // ✅ Admin ViewModel for Compose
     val adminViewModel: AdminViewModel = viewModel()
+
+    val reviewViewModel: ReviewViewModel = viewModel()
 
     data class NavItem(val label: String, val icon: Int)
 
@@ -82,7 +84,10 @@ fun DashBody() {
                 .padding(padding)
         ) {
             when (selectedIndex) {
-                0 -> Homescreen()
+                0 -> ReviewScreen(
+                    viewModel = reviewViewModel,
+                    onMenuClick = { /* Handle drawer if needed */ }
+                )
                 1 -> UserScreen()
                 2 -> AdminProfileScreen()
                 else -> Homescreen()
