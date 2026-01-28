@@ -4,14 +4,21 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -19,215 +26,176 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.sem3project.R
-import com.example.sem3project.viewmodel.AdminProfileViewModel
+import com.example.sem3project.ui.theme.green20
+import com.example.sem3project.viewmodel.AdminViewModel
 
 @Composable
 fun AdminProfileScreen(
-    viewModel: AdminProfileViewModel = viewModel()
+    viewModel: AdminViewModel = viewModel()
 ) {
     val admin by viewModel.adminData
     val isLoading by viewModel.isLoading
 
     var isEditing by remember { mutableStateOf(false) }
-    var menuExpanded by remember { mutableStateOf(false) } // For dot menu
+    var tempName by remember { mutableStateOf("") }
 
-    // Editable fields
-    var name by remember { mutableStateOf(admin.name) }
-    var username by remember { mutableStateOf(admin.username) }
-    var email by remember { mutableStateOf(admin.email) }
-    var role by remember { mutableStateOf(admin.role) }
-
-    // Fetch profile when screen loads
     LaunchedEffect(Unit) {
         viewModel.fetchAdminProfile()
     }
 
-    // Update fields when admin data changes
-    LaunchedEffect(admin) {
-        name = admin.name
-        username = admin.username
-        email = admin.email
-        role = admin.role
+    if (isEditing) {
+        AlertDialog(
+            onDismissRequest = { isEditing = false },
+            title = { Text(text = "Edit Name", fontWeight = FontWeight.Bold) },
+            text = {
+                OutlinedTextField(
+                    value = tempName,
+                    onValueChange = { tempName = it },
+                    label = { Text("First Name") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.updateAdminProfile(tempName)
+                        isEditing = false
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = green20)
+                ) {
+                    Text("Save")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { isEditing = false }) {
+                    Text("Cancel", color = Color.Gray)
+                }
+            }
+        )
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-    ) {
+    Scaffold(
+        containerColor = Color(0xFFF8F9FA)
+    ) { padding ->
         if (isLoading) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-        }
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp)
-        ) {
-            /* ---------------- TOP BAR WITH DOT MENU ---------------- */
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 14.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Admin Profile",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                )
-
-                // Three-dot menu
-                Box {
-                    IconButton(onClick = { menuExpanded = true }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.baseline_more_vert_24),
-                            contentDescription = "Menu"
-                        )
-                    }
-
-                    DropdownMenu(
-                        expanded = menuExpanded,
-                        onDismissRequest = { menuExpanded = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("Logout") },
-                            onClick = {
-                                menuExpanded = false
-                                viewModel.logout() // implement logout in ViewModel
-                            }
-                        )
-                    }
-                }
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = green20)
             }
-
-            Spacer(modifier = Modifier.height(30.dp))
-
-            /* ---------------- PROFILE IMAGE ---------------- */
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .verticalScroll(rememberScrollState())
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.icon), // Placeholder
-                    contentDescription = "Admin Profile Image",
+                Box(
                     modifier = Modifier
-                        .size(130.dp)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
-                )
-            }
-
-            Spacer(modifier = Modifier.height(18.dp))
-
-            /* ---------------- ADMIN INFO ---------------- */
-            if (!isEditing) {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .fillMaxWidth()
+                        .background(green20)
+                        .padding(vertical = 40.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = admin.name.ifBlank { "Admin Name" },
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = admin.username.ifBlank { "Username" },
-                        fontSize = 16.sp,
-                        color = Color.Gray
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = admin.email.ifBlank { "Email" },
-                        fontSize = 14.sp,
-                        color = Color.Gray
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = admin.role.ifBlank { "Admin" },
-                        fontSize = 14.sp,
-                        color = Color(0xFF4CAF50),
-                        fontWeight = FontWeight.Medium
-                    )
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Image(
+                            painter = painterResource(id = R.drawable.icon),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(100.dp)
+                                .clip(CircleShape)
+                                .background(Color.White)
+                                .padding(4.dp)
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = admin.firstName.ifEmpty { "Admin" },
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp
+                        )
+                        Text(
+                            text = admin.role.uppercase(),
+                            color = Color.White.copy(alpha = 0.8f),
+                            fontSize = 12.sp
+                        )
+                    }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(25.dp))
 
-            /* ---------------- EDIT BUTTON ---------------- */
-            Button(
-                onClick = { isEditing = !isEditing },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp),
-                shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF1F1F1))
-            ) {
-                Text(if (isEditing) "Cancel" else "Edit Profile", color = Color.Black)
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            /* ---------------- EDIT FORM ---------------- */
-            if (isEditing) {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-
-                    OutlinedTextField(
-                        value = name,
-                        onValueChange = { name = it },
-                        label = { Text("Name") },
-                        modifier = Modifier.fillMaxWidth()
+                Column(modifier = Modifier.padding(16.dp)) {
+                    ProfileInfoCard(
+                        label = "First Name",
+                        value = admin.firstName,
+                        icon = Icons.Default.Person
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    OutlinedTextField(
-                        value = username,
-                        onValueChange = { username = it },
-                        label = { Text("Username") },
-                        modifier = Modifier.fillMaxWidth()
+                    ProfileInfoCard(
+                        label = "Email Address",
+                        value = admin.email,
+                        icon = Icons.Default.Email
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    OutlinedTextField(
-                        value = email,
-                        onValueChange = { email = it },
-                        label = { Text("Email") },
-                        modifier = Modifier.fillMaxWidth()
+                    ProfileInfoCard(
+                        label = "Account Status",
+                        value = admin.status.uppercase(),
+                        icon = Icons.Default.Person
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
 
-                    OutlinedTextField(
-                        value = role,
-                        onValueChange = { role = it },
-                        label = { Text("Role") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
 
+                    //Trigger the Dialogbox
                     Button(
                         onClick = {
-                            viewModel.updateAdminProfile(
-                                name = name,
-                                username = username,
-                                email = email,
-                                role = role
-                            )
-                            isEditing = false
+                            tempName = admin.firstName
+                            isEditing = true
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp),
-                        shape = RoundedCornerShape(14.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = green20),
+                        shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text("Save", color = Color.White)
+                        Text("Edit Account Details")
                     }
                 }
+            }
+        }
+    }
+}
+@Composable
+fun ProfileInfoCard(label: String, value: String?, icon: ImageVector) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = green20,
+                modifier = Modifier.size(24.dp)
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column {
+                Text(
+                    text = label,
+                    fontSize = 12.sp,
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Normal
+                )
+                Text(
+                    text = if (value.isNullOrEmpty()) "Not Available" else value,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.Black
+                )
             }
         }
     }

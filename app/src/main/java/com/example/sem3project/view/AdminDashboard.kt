@@ -80,16 +80,13 @@ fun DashBody() {
             }
         }
     ) { padding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
+        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
             when (selectedIndex) {
                 0 -> BookHomeScreen()
                 1 -> ReviewScreen(viewModel = reviewViewModel, onMenuClick = {})
-                2 -> UserScreen()
-                3 -> AdminProfileScreen()
+
+                2 -> UserScreen(adminViewModel = adminViewModel)
+                3 -> AdminProfileScreen(viewModel = adminViewModel)
                 else -> BookHomeScreen()
             }
         }

@@ -10,7 +10,6 @@ interface AdminProfileRepo {
 
     fun updateAdminProfile(
         name: String,
-        username: String,
         callback: (Boolean, String) -> Unit
     )
 }

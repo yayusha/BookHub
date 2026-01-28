@@ -1,8 +1,6 @@
 package com.example.sem3project.view
 
 import android.net.Uri
-import android.Manifest
-import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -18,7 +16,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -31,149 +29,111 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.example.sem3project.R
 import com.example.sem3project.model.BookModel
 import com.example.sem3project.repo.BookRepoImpl
 import com.example.sem3project.repo.ImageRepoImpl
-import com.example.sem3project.utils.ImageUtils
-import com.example.sem3project.utils.NotificationHelper
 import com.example.sem3project.ui.theme.green20
-
 import com.example.sem3project.viewmodel.BookViewModel
 import com.example.sem3project.viewmodel.ImageViewModel
 
 class AddBook : ComponentActivity() {
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
         setContent {
             AddBookScreen()
         }
     }
 }
 
-    @Composable
-    fun AddBookScreen() {
-        val context = LocalContext.current
-        val notificationPermissionLauncher = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.RequestPermission()
-        ) { isGranted ->
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AddBookScreen() {
+    val context = LocalContext.current
+    val activity = context as? android.app.Activity
 
-        }
-        LaunchedEffect(Unit) {
-            NotificationHelper.createNotificationChannel(context)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-            }
-        }
+    // ✅ Manually initializing ViewModels with Repos to prevent constructor crashes
+    val bookViewModel = remember { BookViewModel(BookRepoImpl()) }
+    val imageViewModel = remember { ImageViewModel(ImageRepoImpl()) }
 
+    var bookName by remember { mutableStateOf("") }
+    var bookGenre by remember { mutableStateOf("") }
+    var bookAuthor by remember { mutableStateOf("") }
+    var bookDescription by remember { mutableStateOf("") }
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
+    var cloudinaryLink by remember { mutableStateOf("") }
+    var isUploading by remember { mutableStateOf(false) }
 
-        val bookViewModel = remember { BookViewModel(BookRepoImpl()) }
-        val imageViewModel = remember { ImageViewModel(ImageRepoImpl()) }
-
-        var bookName by remember { mutableStateOf("") }
-        var bookGenre by remember { mutableStateOf("") }
-        var bookAuthor by remember { mutableStateOf("") }
-        var bookDescription by remember { mutableStateOf("") }
-        var imageUri by remember { mutableStateOf<Uri?>(null) }
-        var cloudinaryLink by remember { mutableStateOf("") }
-
-        val imagePickerLauncher =
-            rememberLauncherForActivityResult(
-                contract = ActivityResultContracts.GetContent()
-            ) { uri ->
-                imageUri = uri
-                imageUri?.let {
-                    imageViewModel.uploadImage(context, it) { success, message ->
-                        if (success) {
-                            cloudinaryLink = message.toString()
-                        }
-                    }
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let {
+            imageUri = it
+            isUploading = true
+            imageViewModel.uploadImage(context, it) { success, message ->
+                isUploading = false
+                if (success) {
+                    cloudinaryLink = message.toString()
+                } else {
+                    Toast.makeText(context, "Upload failed: $message", Toast.LENGTH_SHORT).show()
                 }
             }
+        }
+    }
 
-
-        Scaffold { padding ->
-            Column(
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Add New Book", color = Color.White) },
+                navigationIcon = {
+                    IconButton(onClick = { activity?.finish() }) {
+                        // ✅ Changed to standard Icon to prevent drawable-missing crash
+                        Icon(Icons.Default.ArrowBack, "Back", tint = Color.White)
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = green20)
+            )
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(15.dp)
+        ) {
+            Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(10.dp),
-                verticalArrangement = Arrangement.spacedBy(15.dp)
+                    .fillMaxWidth()
+                    .height(180.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color.Gray)
+                    .clickable { imagePickerLauncher.launch("image/*") },
+                contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "Add Book",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
-
-                )
-
-                // Image Picker
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(180.dp)
-                        .clickable { imagePickerLauncher.launch("image/*") },
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (imageUri == null) {
-                        Image(
-                            painter = painterResource(R.drawable.placeholder),
-                            contentDescription = null,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
-                    } else {
-                        Image(
-                            painter = rememberAsyncImagePainter(imageUri),
-                            contentDescription = null,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
-                    }
+                if (imageUri == null) {
+                    Image(painterResource(R.drawable.placeholder), null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                } else {
+                    Image(rememberAsyncImagePainter(imageUri), null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
                 }
+                if (isUploading) CircularProgressIndicator(color = Color.White)
+            }
 
-                Spacer(modifier = Modifier.height(24.dp))
+            OutlinedTextField(value = bookName, onValueChange = { bookName = it }, label = { Text("Book Name") }, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(value = bookAuthor, onValueChange = { bookAuthor = it }, label = { Text("Author") }, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(value = bookGenre, onValueChange = { bookGenre = it }, label = { Text("Genre") }, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(value = bookDescription, onValueChange = { bookDescription = it }, label = { Text("Description") }, modifier = Modifier.fillMaxWidth(), maxLines = 4)
 
-                // 🔹 INPUT FIELDS
-                OutlinedTextField(
-                    value = bookName,
-                    onValueChange = { bookName = it },
-                    placeholder = { Text("Book Name") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                OutlinedTextField(
-                    value = bookAuthor,
-                    onValueChange = { bookAuthor = it },
-                    placeholder = { Text("Author") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                OutlinedTextField(
-                    value = bookGenre,
-                    onValueChange = { bookGenre = it },
-                    placeholder = { Text("Genre") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                OutlinedTextField(
-                    value = bookDescription,
-                    onValueChange = { bookDescription = it },
-                    placeholder = { Text("Description") },
-                    modifier = Modifier.fillMaxWidth(),
-                    maxLines = 4
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Button(
-                    onClick = {
+            Button(
+                onClick = {
+                    if (cloudinaryLink.isEmpty()) {
+                        Toast.makeText(context, "Please upload an image first", Toast.LENGTH_SHORT).show()
+                    } else if (bookName.isBlank()) {
+                        Toast.makeText(context, "Please enter a book name", Toast.LENGTH_SHORT).show()
+                    } else {
                         val book = BookModel(
                             bookName = bookName,
                             author = bookAuthor,
@@ -181,23 +141,17 @@ class AddBook : ComponentActivity() {
                             description = bookDescription,
                             imageUrl = cloudinaryLink
                         )
-                        bookViewModel.addBook(context,book) { success, message ->
+                        bookViewModel.addBook(context, book) { success, message ->
                             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                            if (success) activity?.finish()
                         }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = green20,   //bg
-                        contentColor = Color.White
-                    )
-                )
-                {
-                    Text("Add Book")
-                }
-
-
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = green20)
+            ) {
+                Text("Add Book", color = Color.White, fontWeight = FontWeight.Bold)
             }
         }
-
     }
-
+}
