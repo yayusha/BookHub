@@ -19,6 +19,11 @@ class ProfileViewModel(val repo: ProfileRepo) : ViewModel() {
         repo.deleteProfile(userId, callback)
     }
 
+
+    fun deactivateProfile(userId: String) {
+        repo.deleteProfile(userId) { _, _ -> }
+    }
+
     private val _profile = MutableLiveData<ProfileModel?>()
     val profile: MutableLiveData<ProfileModel?> get() = _profile
 

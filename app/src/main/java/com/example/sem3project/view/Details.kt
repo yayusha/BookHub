@@ -107,6 +107,9 @@ fun BookDetailsScreen(reviewViewModel: ReviewViewModel = viewModel<ReviewViewMod
     var reviewContent by remember {mutableStateOf("")}
     var reviewRating: Int by remember {mutableStateOf(5)}
 
+
+
+
     val listData= listOf(
         "Fantasy","Contemporary","Romance",
         "New adult",
@@ -154,6 +157,7 @@ fun BookDetailsScreen(reviewViewModel: ReviewViewModel = viewModel<ReviewViewMod
                         tint = White20
                     )
                 }
+             
             }
         }
 

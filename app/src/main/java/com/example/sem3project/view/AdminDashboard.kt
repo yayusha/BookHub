@@ -1,6 +1,5 @@
 package com.example.sem3project.view
 
-import com.example.sem3project.R
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
@@ -17,6 +16,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.sem3project.R
+import com.example.sem3project.viewmodel.AdminViewModel
 
 class AdminDashboard : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,6 +35,9 @@ class AdminDashboard : ComponentActivity() {
 fun DashBody() {
     val context = LocalContext.current
     val activity = context as Activity
+
+    // ✅ Admin ViewModel for Compose
+    val adminViewModel: AdminViewModel = viewModel()
 
     data class NavItem(val label: String, val icon: Int)
 
@@ -60,7 +65,7 @@ fun DashBody() {
                         icon = {
                             Icon(
                                 painter = painterResource(item.icon),
-                                contentDescription = null
+                                contentDescription = item.label
                             )
                         },
                         label = { Text(item.label) },
@@ -77,10 +82,10 @@ fun DashBody() {
                 .padding(padding)
         ) {
             when (selectedIndex) {
-                0 -> BookHomeScreen()
+                0 -> HomeScreen()
                 1 -> UserScreen()
-                2 -> ProfileScreen()
-                else -> BookHomeScreen()
+                2 -> AdminProfileScreen()
+                else -> HomeScreen()
             }
         }
     }

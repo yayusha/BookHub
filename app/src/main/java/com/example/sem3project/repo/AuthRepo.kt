@@ -31,4 +31,8 @@ interface AuthRepo {
     )
     fun forgotPassword(email: String,
                        callback: (Boolean, String) -> Unit)
+    fun deactivateUser (
+        userId: String,
+        callback: (Boolean, String) -> Unit)
+
 }

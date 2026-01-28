@@ -111,4 +111,20 @@ class AuthRepoImpl: AuthRepo {
             if (it.isSuccessful) callback(true, "Reset link sent")
             else callback(false, it.exception?.message ?: "Failed")
         }    }
+    override fun deactivateUser(
+        userId: String,
+        callback: (Boolean, String) -> Unit
+    ) {
+        ref.child(userId)
+            .child("isActive")
+            .setValue(false)
+            .addOnCompleteListener {
+                if (it.isSuccessful) {
+                    callback(true, "User deactivated successfully")
+                } else {
+                    callback(false, it.exception?.message ?: "Failed to deactivate")
+                }
+            }
+    }
+
 }

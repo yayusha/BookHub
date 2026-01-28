@@ -5,15 +5,20 @@ data class UserModel(
     val email: String? = "",
     val firstName: String? = "",
     val lastName: String? = "",
-    val phoneNumber: String? = ""
+    val phoneNumber: String? = "",
+    val status: String = "active"
 ) {
+    val isBanned: Boolean
+        get() = status == "banned"
     fun toMap(): Map<String, Any?> {
         return mapOf(
             "userId" to userId,
             "email" to email,
             "firstName" to firstName,
             "lastName" to lastName,
-            "phoneNumber" to phoneNumber
+            "phoneNumber" to phoneNumber,
+            "status" to status
+
         )
     }
 }

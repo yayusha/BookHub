@@ -11,35 +11,51 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Sem3Project">
 
+        <!-- Launcher Activity -->
         <activity
-            android:name=".view.LoginActivity"
-            android:exported="true">
+            android:name=".view.SplashActivity"
+            android:exported="true"
+            android:label="@string/title_activity_splash"
+            android:theme="@style/Theme.Sem3Project">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
+        <!-- Auth -->
+        <activity
+            android:name=".view.LoginActivity"
+            android:exported="true" />
+        <activity
+            android:name=".view.RegistrationActivity"
+            android:exported="true" />
+        <activity
+            android:name=".view.Forget"
+            android:exported="false" />
+
+        <!-- Dashboards -->
         <activity
             android:name=".view.UserDashboard"
             android:exported="true" />
-
         <activity
             android:name=".view.AdminDashboard"
             android:exported="true"
             android:label="@string/title_activity_admin_dashboard" />
 
+        <!-- Books -->
         <activity
             android:name=".view.AddBook"
             android:exported="true"
-            android:label="Add Book" />
-
+            android:label="Add Book"
+            android:theme="@style/Theme.Sem3Project" />
         <activity
-            android:name=".view.RegistrationActivity"
+            android:name=".view.Details"
             android:exported="false" />
 
+        <!-- Optional / extra -->
         <activity
-            android:name=".view.Forget"
+            android:name=".view.MainActivity"
             android:exported="false" />
 
     </application>

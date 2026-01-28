@@ -1,5 +1,6 @@
 package com.example.sem3project.view
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -233,6 +234,7 @@ fun LoginBody() {
         Spacer(modifier = Modifier.height(30.dp))
 
         // -------- SUBMIT BUTTON --------
+
         Button(
             onClick = {
                 // TRIM THE STRINGS HERE
@@ -254,9 +256,12 @@ fun LoginBody() {
                 auth.signInWithEmailAndPassword(cleanEmail, cleanPassword)
                     .addOnSuccessListener {
                         Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
+
                         val intent = Intent(context, UserDashboard::class.java)
                         context.startActivity(intent)
+                        (context as? Activity)?.finish()
                     }
+
                     .addOnFailureListener {
                         Toast.makeText(context, it.message ?: "Login failed", Toast.LENGTH_SHORT).show()
                     }

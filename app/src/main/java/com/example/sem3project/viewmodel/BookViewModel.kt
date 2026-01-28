@@ -10,22 +10,17 @@ import com.example.sem3project.utils.NotificationHelper
 
 class BookViewModel(val repo: BookRepo) : ViewModel() {
 
-    // Backup list for restoring unfiltered data
     private var originalList = listOf<BookModel>()
 
-    // LiveData for a single book (detail screen)
     private val _books = MutableLiveData<BookModel?>()
     val books: LiveData<BookModel?> get() = _books
 
-    // LiveData for HomeScreen & UserDashboard
     private val _dashboardBooks = MutableLiveData<List<BookModel>?>()
     val dashboardBooks: LiveData<List<BookModel>?> get() = _dashboardBooks
 
-    // LiveData for admin / backup
     private val _allBooks = MutableLiveData<List<BookModel>?>()
     val allBooks: LiveData<List<BookModel>?> get() = _allBooks
 
-    // 🔹 ADD BOOK (Admin – with notification)
     fun addBook(
         context: Context,
         model: BookModel,
@@ -39,26 +34,20 @@ class BookViewModel(val repo: BookRepo) : ViewModel() {
         }
     }
 
-    // 🔹 UPDATE BOOK
     fun updateBook(model: BookModel, callback: (Boolean, String) -> Unit) {
         repo.updateBook(model, callback)
     }
 
-    // 🔹 DELETE BOOK
     fun deleteBook(bookID: String, callback: (Boolean, String) -> Unit) {
         repo.deleteBook(bookID, callback)
     }
 
-    // 🔹 Get single book by ID
     fun getBookById(bookID: String) {
         repo.getBookById(bookID) { success, _, data ->
-            if (success) {
-                _books.postValue(data)
-            }
+            if (success) _books.postValue(data)
         }
     }
 
-    // 🔹 Get all books
     fun getAllProduct() {
         repo.getAllBooks { success, _, data ->
             if (success) {
@@ -69,16 +58,10 @@ class BookViewModel(val repo: BookRepo) : ViewModel() {
         }
     }
 
-    // 🔹 Filter by genre (Search)
     fun filterByGenre(genreId: String) {
-        if (genreId.isEmpty()) {
-            _dashboardBooks.postValue(originalList)
-        } else {
-            _dashboardBooks.postValue(
-                originalList.filter {
-                    it.genreId.equals(genreId, ignoreCase = true)
-                }
-            )
-        }
+        if (genreId.isEmpty()) _dashboardBooks.postValue(originalList)
+        else _dashboardBooks.postValue(
+            originalList.filter { it.genreId.equals(genreId, ignoreCase = true) }
+        )
     }
 }

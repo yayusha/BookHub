@@ -8,25 +8,16 @@ import com.example.sem3project.repo.AuthRepoImpl
 
 class AuthViewModel(val repo: AuthRepo = AuthRepoImpl()) : ViewModel() {
 
+    // 🔹 Authentication methods
     fun login(email: String, pass: String, callback: (Boolean, String) -> Unit) {
-        repo.login(email, pass, callback)
+        repo.login(email = email, pass, callback = callback)
     }
 
     fun register(email: String, pass: String, callback: (Boolean, String, String) -> Unit) {
         repo.register(email, pass, callback)
     }
 
-    fun addUserToDatabase(
-        userId: String, model: UserModel,
-        callback: (Boolean, String) -> Unit
-    ) {
-        repo.addUserToDatabase(userId, model, callback)
-    }
-
-    fun forgetPassword(
-        email: String,
-        callback: (Boolean, String) -> Unit
-    ) {
+    fun forgetPassword(email: String, callback: (Boolean, String) -> Unit) {
         repo.forgotPassword(email, callback)
     }
 
@@ -34,33 +25,32 @@ class AuthViewModel(val repo: AuthRepo = AuthRepoImpl()) : ViewModel() {
         repo.deleteAccount(userId, callback)
     }
 
-    fun editProfile(
-        userId: String, model: UserModel,
-        callback: (Boolean, String) -> Unit
-    ) {
+    fun addUserToDatabase(userId: String, model: UserModel, callback: (Boolean, String) -> Unit) {
+        repo.addUserToDatabase(userId, model, callback)
+    }
+
+    fun editProfile(userId: String, model: UserModel, callback: (Boolean, String) -> Unit) {
         repo.editProfile(userId, model, callback)
     }
 
+    fun deactivateUser(userId: String, callback: (Boolean, String) -> Unit) {
+        repo.deactivateUser(userId, callback)
+    }
+
+    // 🔹 LiveData for single user
     private val _users = MutableLiveData<UserModel?>()
-    val users: MutableLiveData<UserModel?>
-        get() = _users
+    val users: MutableLiveData<UserModel?> get() = _users
 
+    // 🔹 LiveData for all users (Admin)
     private val _allUsers = MutableLiveData<List<UserModel>?>()
-    val allUsers: MutableLiveData<List<UserModel>?>
-        get() = _allUsers
+    val allUsers: MutableLiveData<List<UserModel>?> get() = _allUsers
 
-    fun getUserById(
-        userId: String
-    ) {
-        repo.getUserById(userId) { success, msg, data ->
+    // 🔹 Get user by ID
+    fun getUserById(userId: String) {
+        repo.getUserById(userId) { success, _, data ->
             if (success) {
                 _users.postValue(data)
             }
-        }git
-    }
-
-    fun forgotPassword(email: String, callback: (Boolean, String) -> Unit) {
-        repo.forgotPassword(email, callback)
+        }
     }
 }
-
