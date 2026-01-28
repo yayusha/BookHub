@@ -9,7 +9,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Sem3Project">
 
-        <!-- ✅ ONLY ONE LAUNCHER -->
         <activity
             android:name=".view.RegistrationActivity"
             android:exported="true"
@@ -21,7 +20,6 @@
             </intent-filter>
         </activity>
 
-        <!-- Admin Dashboard (NO launcher) -->
         <activity
             android:name=".view.AdminDashboard"
             android:exported="true"
@@ -35,15 +33,10 @@
             android:theme="@style/Theme.Sem3Project" />
 
         <activity android:name=".view.Details" android:exported="true" />
-        <activity android:name=".view.RegistrationActivity" android:exported="false" />
         <activity android:name=".view.Forget" android:exported="false" />
         <activity android:name=".view.UserDashboard" android:exported="true" />
         <activity android:name=".view.MainActivity" android:exported="false" />
-        <activity android:name=".view.Details" />
         <activity android:name=".view.LoginActivity" />
-        <activity android:name=".view.Forget" />
-        <activity android:name=".view.UserDashboard" />
-        <activity android:name=".view.MainActivity" />
 
     </application>
 
