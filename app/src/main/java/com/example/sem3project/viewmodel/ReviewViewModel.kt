@@ -10,14 +10,12 @@ import com.example.sem3project.repo.ReviewRepoImpl
 class ReviewViewModel(val repo: ReviewRepo= ReviewRepoImpl()): ViewModel() {
     private val _reviews = mutableStateOf<List<ReviewModel>>(emptyList())
     val reviews: State<List<ReviewModel>> = _reviews
-    // new state variables
     private val _isLoading = mutableStateOf(false)
     val isLoading: State<Boolean> = _isLoading
 
     private val _deleteStatus = mutableStateOf<String?>(null)
     val deleteStatus: State<String?> = _deleteStatus
 
-//    initializer Block (Calls fetchReview fun immediately
     init {
         fetchReviews()
     }
@@ -53,13 +51,11 @@ class ReviewViewModel(val repo: ReviewRepo= ReviewRepoImpl()): ViewModel() {
         }
     }
 
-
-    // ===== NEW:
     fun deleteReview(reviewId: String) {
         repo.deleteReview(reviewId) { success ->
             if (success) {
                 _deleteStatus.value = "Review deleted successfully"
-                fetchReviews() // Refresh the list after deletion
+                fetchReviews()
             } else {
                 _deleteStatus.value = "Failed to delete review"
             }
@@ -68,6 +64,16 @@ class ReviewViewModel(val repo: ReviewRepo= ReviewRepoImpl()): ViewModel() {
 
     fun clearDeleteStatus() {
         _deleteStatus.value = null
+    }
+
+    fun resolveReview(reviewId: String) {
+        repo.updateReviewStatus(reviewId, false) { success ->
+            if (success) {
+                _reviews.value = _reviews.value.map {
+                    if (it.id == reviewId) it.copy(isReported = false) else it
+                }
+            }
+        }
     }
 
 }

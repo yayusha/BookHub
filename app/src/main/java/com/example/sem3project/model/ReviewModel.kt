@@ -6,4 +6,5 @@ data class ReviewModel(
     val title: String="",
     val content: String="",
     val rating: Double= 5.0,
+    val isReported: Boolean = false
 )

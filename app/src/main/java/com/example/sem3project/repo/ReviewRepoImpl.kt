@@ -57,12 +57,20 @@ class ReviewRepoImpl : ReviewRepo {
     override fun deleteReview(reviewId: String, callback: (Boolean) -> Unit) {
         database.child(reviewId).removeValue()
             .addOnSuccessListener {
-                // Successfully deleted
                 callback(true)
             }
             .addOnFailureListener {
-                // Failed to delete
                 callback(false)
             }
+    }
+
+    override fun updateReviewStatus(reviewId: String, isReported: Boolean, callback: (Boolean) -> Unit) {
+        val dbRef = FirebaseDatabase.getInstance().getReference("reviews").child(reviewId)
+
+        val update = mapOf("isReported" to isReported)
+
+        dbRef.updateChildren(update).addOnCompleteListener { task ->
+            callback(task.isSuccessful)
+        }
     }
 }
