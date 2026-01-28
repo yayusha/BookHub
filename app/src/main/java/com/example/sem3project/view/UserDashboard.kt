@@ -1,8 +1,37 @@
+package com.example.sem3project.view
+
+import android.app.Activity
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import com.example.sem3project.R
+import com.example.sem3project.ui.theme.White20
+import com.example.sem3project.ui.theme.green20
+
+class UserDashboard : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            DashboardBody()
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardBody() {
+
     val context = LocalContext.current
-    val activity = context as? Activity
+    val activity = context as Activity
 
     data class NavItem(val label: String, val icon: Int)
 
@@ -26,25 +55,20 @@ fun DashboardBody() {
                     actionIconContentColor = White20
                 ),
                 title = { Text("BookHub") },
+
                 navigationIcon = {
-                    IconButton(onClick = { /* Handle Drawer if needed */ }) {
+                    IconButton(onClick = { }) {
                         Icon(
                             painter = painterResource(R.drawable.baseline_menu_24),
                             contentDescription = "Menu"
                         )
                     }
                 },
-                actions = {
-                    // Added search toggle button so you can actually use the search bar!
-                    IconButton(onClick = { showSearch = !showSearch }) {
-                        Icon(
-                            painter = painterResource(android.R.drawable.ic_menu_search),
-                            contentDescription = "Search"
-                        )
-                    }
-                }
+
+
             )
         },
+
         bottomBar = {
             NavigationBar {
                 listItems.forEachIndexed { index, item ->
@@ -52,7 +76,7 @@ fun DashboardBody() {
                         selected = selectedIndex == index,
                         onClick = {
                             selectedIndex = index
-                            if (index != 0) showSearch = false
+                            showSearch = false
                         },
                         icon = {
                             Icon(
@@ -65,30 +89,32 @@ fun DashboardBody() {
                 }
             }
         }
+
     ) { paddingValues ->
-        // The combined logic:
-        Column(
+        // prevent "Infinite Height" layout issues
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
             when (selectedIndex) {
                 0 -> {
-                    // Home logic with search bar support
-                    if (showSearch) {
-                        OutlinedTextField(
-                            value = searchText,
-                            onValueChange = { searchText = it },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(12.dp),
-                            label = { Text("Search books...") },
-                            singleLine = true
-                        )
+                    Column {
+                        if (showSearch) {
+                            OutlinedTextField(
+                                value = searchText,
+                                onValueChange = { searchText = it },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp),
+                                label = { Text("Search books...") },
+                                singleLine = true
+                            )
+                        }
+                        Homescreen()
                     }
-                    HomeScreen() // Unified name
                 }
-                1 -> NotificationScreen() // Or UserScreen() depending on your preference
+                1 -> NotificationScreen()
                 2 -> ProfileScreen()
             }
         }

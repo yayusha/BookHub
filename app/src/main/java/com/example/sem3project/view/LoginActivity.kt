@@ -34,6 +34,9 @@ import com.google.firebase.auth.FirebaseAuth
 
 import com.example.sem3project.R
 
+import com.google.firebase.database.FirebaseDatabase
+
+
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -251,20 +254,35 @@ fun LoginBody() {
                     Toast.makeText(context, "Enter a valid email address", Toast.LENGTH_SHORT).show()
                     return@Button
                 }
+                      auth.signInWithEmailAndPassword(cleanEmail, cleanPassword)
+                            .addOnSuccessListener { authResult ->
+                                val userId = authResult.user?.uid
 
-                // Use cleanEmail and cleanPassword for Firebase
-                auth.signInWithEmailAndPassword(cleanEmail, cleanPassword)
-                    .addOnSuccessListener {
-                        Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
+                                if (userId != null) {
+                                    val userRef = FirebaseDatabase.getInstance().getReference("Users").child(userId)
+                                    userRef.get().addOnSuccessListener { snapshot ->
+                                        val role = snapshot.child("role").getValue(String::class.java) ?: "user"
 
-                        val intent = Intent(context, UserDashboard::class.java)
-                        context.startActivity(intent)
-                        (context as? Activity)?.finish()
-                    }
+                                        // This handles "Admin", "admin", and "ADMIN" all at once
+                                        val intent = if (role.equals("admin", ignoreCase = true)) {
+                                            Intent(context, AdminDashboard::class.java)
+                                        } else {
+                                            Intent(context, UserDashboard::class.java)
+                                        }
 
-                    .addOnFailureListener {
-                        Toast.makeText(context, it.message ?: "Login failed", Toast.LENGTH_SHORT).show()
-                    }
+                                        context.startActivity(intent)
+                                        (context as? Activity)?.finish()
+                                    }
+                                        .addOnFailureListener {
+                                            // If database fetch fails, default to UserDashboard
+                                            context.startActivity(Intent(context, UserDashboard::class.java))
+                                            (context as? Activity)?.finish()
+                                        }
+                                }
+                            }
+                            .addOnFailureListener {
+                                Toast.makeText(context, it.message ?: "Login failed", Toast.LENGTH_SHORT).show()
+                            }
 
             },
             modifier = Modifier

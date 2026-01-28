@@ -422,8 +422,7 @@ fun BookDetailsScreen(reviewViewModel: ReviewViewModel = viewModel<ReviewViewMod
                         title = reviewTitle,
                         content = reviewContent,
                         rating = reviewRating.toDouble(),
-                        date = SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault()).format(
-                            Date()
+                        date = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date()
                         )
                     )
 

@@ -25,7 +25,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.sem3project.R
-import com.example.sem3project.view.ui.theme.White
+import com.example.sem3project.ui.theme.White20
 import kotlinx.coroutines.delay
 
 class SplashActivity : ComponentActivity() {
@@ -55,7 +55,7 @@ fun SplashBody() {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .background(White),
+                .background(White20),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {

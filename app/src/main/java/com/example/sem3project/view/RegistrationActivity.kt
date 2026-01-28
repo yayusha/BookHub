@@ -33,6 +33,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.sem3project.R
 import com.example.sem3project.model.UserModel
 import com.example.sem3project.ui.theme.White20
@@ -54,7 +55,7 @@ class RegistrationActivity : ComponentActivity() {
 @Composable
 fun RegistrationBody() {
     val context = LocalContext.current
-    val authViewModel = remember { AuthViewModel() }
+    val authViewModel: AuthViewModel = viewModel()
 
     var fullName by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
@@ -212,11 +213,14 @@ fun RegistrationBody() {
                                         email = email,
                                         firstName = fullName.split(" ").first(),
                                         lastName = fullName.split(" ").getOrNull(1) ?: "",
-                                        phoneNumber = ""
+                                        phoneNumber = "",
+                                        role= "user"
                                     )
                                     authViewModel.addUserToDatabase(userId, user) { dbSuccess, dbMsg ->
                                         if (dbSuccess) {
                                             Toast.makeText(context, "Success!", Toast.LENGTH_SHORT).show()
+                                            val intent = Intent(context, LoginActivity::class.java)
+                                            context.startActivity(intent)
                                             activity?.finish()
                                         } else Toast.makeText(context, dbMsg, Toast.LENGTH_LONG).show()
                                     }
@@ -239,7 +243,11 @@ fun RegistrationBody() {
                     text = "Login",
                     color = blue20,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.clickable { activity?.finish() }
+                    modifier = Modifier.clickable {
+                        val intent = Intent(context, LoginActivity::class.java)
+                        context.startActivity(intent)
+                        activity?.finish()
+                    }
                 )
             }
         }

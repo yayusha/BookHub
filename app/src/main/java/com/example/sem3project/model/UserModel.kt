@@ -6,10 +6,15 @@ data class UserModel(
     val firstName: String? = "",
     val lastName: String? = "",
     val phoneNumber: String? = "",
-    val status: String = "active"
+    val status: String = "active",
+    val role: String = "user"
 ) {
     val isBanned: Boolean
         get() = status == "banned"
+
+    val isAdmin: Boolean
+        get() = role == "admin"
+
     fun toMap(): Map<String, Any?> {
         return mapOf(
             "userId" to userId,
@@ -17,8 +22,8 @@ data class UserModel(
             "firstName" to firstName,
             "lastName" to lastName,
             "phoneNumber" to phoneNumber,
-            "status" to status
-
+            "status" to status,
+            "role" to role
         )
     }
 }
