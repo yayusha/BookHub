@@ -5,7 +5,7 @@ data class ProfileModel(
     var username: String = "",
     var email: String = "",
     var bio: String = "",
-    var profileImage: String = ""
+    var imageUrl: String = ""
 ) {
     fun toMap(): Map<String, Any?> {
         return mapOf(
@@ -13,7 +13,7 @@ data class ProfileModel(
             "username" to username,
             "email" to email,
             "bio" to bio,
-            "profileImage" to profileImage
+            "imageUrl" to imageUrl,
         )
     }
 }

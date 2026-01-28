@@ -72,6 +72,9 @@ fun RegistrationBody() {
     var isUsernameFocused by remember { mutableStateOf(false) }
 
     val green = Color(0xFF4CAF50)
+    //val activity = context as Activity
+
+
 
     Scaffold(modifier = Modifier.fillMaxSize()) { padding ->
 

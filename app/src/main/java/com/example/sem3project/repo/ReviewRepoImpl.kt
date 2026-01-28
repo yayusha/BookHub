@@ -53,4 +53,16 @@ class ReviewRepoImpl : ReviewRepo {
         booksDb.child(bookId).child("rating").setValue(rating)
             .addOnCompleteListener { callback(it.isSuccessful) }
     }
+
+    override fun deleteReview(reviewId: String, callback: (Boolean) -> Unit) {
+        database.child(reviewId).removeValue()
+            .addOnSuccessListener {
+                // Successfully deleted
+                callback(true)
+            }
+            .addOnFailureListener {
+                // Failed to delete
+                callback(false)
+            }
+    }
 }

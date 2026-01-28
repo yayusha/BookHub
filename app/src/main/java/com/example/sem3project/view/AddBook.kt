@@ -1,6 +1,8 @@
 package com.example.sem3project.view
 
 import android.net.Uri
+import android.Manifest
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -36,7 +38,9 @@ import com.example.sem3project.model.BookModel
 import com.example.sem3project.repo.BookRepoImpl
 import com.example.sem3project.repo.ImageRepoImpl
 import com.example.sem3project.utils.ImageUtils
+<import com.example.sem3project.utils.NotificationHelper
 import com.example.sem3project.ui.theme.green20
+
 import com.example.sem3project.viewmodel.BookViewModel
 import com.example.sem3project.viewmodel.ImageViewModel
 
@@ -56,6 +60,18 @@ class AddBook : ComponentActivity() {
     @Composable
     fun AddBookScreen() {
         val context = LocalContext.current
+        val notificationPermissionLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission()
+        ) { isGranted ->
+
+        }
+        LaunchedEffect(Unit) {
+            NotificationHelper.createNotificationChannel(context)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+
 
         val bookViewModel = remember { BookViewModel(BookRepoImpl()) }
         val imageViewModel = remember { ImageViewModel(ImageRepoImpl()) }
@@ -165,7 +181,7 @@ class AddBook : ComponentActivity() {
                             description = bookDescription,
                             imageUrl = cloudinaryLink
                         )
-                        bookViewModel.addBook(book) { success, message ->
+                        bookViewModel.addBook(context,book) { success, message ->
                             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                         }
                     },

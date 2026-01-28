@@ -1,10 +1,12 @@
 package com.example.sem3project.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.sem3project.model.BookModel
 import com.example.sem3project.repo.BookRepo
+import com.example.sem3project.utils.NotificationHelper
 
 class BookViewModel(val repo: BookRepo) : ViewModel() {
 
@@ -15,23 +17,34 @@ class BookViewModel(val repo: BookRepo) : ViewModel() {
     private val _books = MutableLiveData<BookModel?>()
     val books: LiveData<BookModel?> get() = _books
 
-    // LiveData for HomeScreen & UserDashboard (filtered/unfiltered)
+    // LiveData for HomeScreen & UserDashboard
     private val _dashboardBooks = MutableLiveData<List<BookModel>?>()
     val dashboardBooks: LiveData<List<BookModel>?> get() = _dashboardBooks
 
-    // LiveData for all books (admin or backup)
+    // LiveData for admin / backup
     private val _allBooks = MutableLiveData<List<BookModel>?>()
     val allBooks: LiveData<List<BookModel>?> get() = _allBooks
 
-    // 🔹 CRUD Operations
-    fun addBook(model: BookModel, callback: (Boolean, String) -> Unit) {
-        repo.addBook(model, callback)
+    // 🔹 ADD BOOK (Admin – with notification)
+    fun addBook(
+        context: Context,
+        model: BookModel,
+        callback: (Boolean, String) -> Unit
+    ) {
+        repo.addBook(model) { success, message ->
+            if (success) {
+                NotificationHelper.showBookAddedNotification(context, model)
+            }
+            callback(success, message)
+        }
     }
 
+    // 🔹 UPDATE BOOK
     fun updateBook(model: BookModel, callback: (Boolean, String) -> Unit) {
         repo.updateBook(model, callback)
     }
 
+    // 🔹 DELETE BOOK
     fun deleteBook(bookID: String, callback: (Boolean, String) -> Unit) {
         repo.deleteBook(bookID, callback)
     }
@@ -45,18 +58,18 @@ class BookViewModel(val repo: BookRepo) : ViewModel() {
         }
     }
 
-    // 🔹 Get all books (fetch once)
+    // 🔹 Get all books
     fun getAllProduct() {
         repo.getAllBooks { success, _, data ->
             if (success) {
-                originalList = data            // store backup for filtering
+                originalList = data
                 _allBooks.postValue(data)
-                _dashboardBooks.postValue(data) // HomeScreen shows this
+                _dashboardBooks.postValue(data)
             }
         }
     }
 
-    // 🔹 Filter by genre (used for search)
+    // 🔹 Filter by genre (Search)
     fun filterByGenre(genreId: String) {
         if (genreId.isEmpty()) {
             _dashboardBooks.postValue(originalList)

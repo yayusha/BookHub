@@ -1,5 +1,4 @@
-package com.example.sem3project.view
-
+import com.example.sem3project.R
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
@@ -11,25 +10,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import com.example.sem3project.R
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-
-
-
 
 class AdminDashboard : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,7 +38,7 @@ fun DashBody() {
 
     val listItems = listOf(
         NavItem(label = "Home", R.drawable.baseline_home_24),
-        NavItem(label = "Notification", R.drawable.baseline_notifications_24),
+        NavItem(label = "Users", R.drawable.baseline_notifications_24),
         NavItem(label = "Profile", R.drawable.baseline_person_24),
     )
 
@@ -90,10 +75,10 @@ fun DashBody() {
                 .padding(padding)
         ) {
             when (selectedIndex) {
-                0 -> Homescreen()
-                1 -> NotificationScreen()
+                0 -> BookHomeScreen()
+                1 -> UserScreen()
                 2 -> ProfileScreen()
-                else -> Homescreen()
+                else -> BookHomeScreen()
             }
         }
     }

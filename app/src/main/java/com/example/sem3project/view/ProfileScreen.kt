@@ -1,34 +1,80 @@
 package com.example.sem3project.view
 
+import android.net.Uri
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberAsyncImagePainter
+import com.example.sem3project.repo.ImageRepoImpl
 import com.example.sem3project.R
+import com.example.sem3project.viewmodel.ImageViewModel
 
 @Composable
 fun ProfileScreen() {
-
+    val context = LocalContext.current
+    val imageViewModel = remember { ImageViewModel(ImageRepoImpl()) }
     var selectedTab by remember { mutableStateOf(1) }
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
+    var cloudinaryLink by remember { mutableStateOf("") }
+    var isUploading by remember { mutableStateOf(false) }
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        imageUri = uri
+        imageUri?.let {
+            isUploading = true
+            imageViewModel.uploadImage(context, it) { success, message ->
+                isUploading = false
+                if (success) {
+                    cloudinaryLink = message.toString()
+                    Toast.makeText(context, "Profile picture updated!", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(context, "Upload failed: $message", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
 
     LazyColumn(
         modifier = Modifier
@@ -36,7 +82,6 @@ fun ProfileScreen() {
             .background(Color.White),
         contentPadding = PaddingValues(bottom = 20.dp)
     ) {
-
         item {
             Row(
                 modifier = Modifier
@@ -52,13 +97,11 @@ fun ProfileScreen() {
                         .size(26.dp)
                         .clickable { }
                 )
-
                 Text(
                     text = "Profile",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
-
                 Icon(
                     painter = painterResource(R.drawable.baseline_menu_24),
                     contentDescription = "Menu",
@@ -76,15 +119,52 @@ fun ProfileScreen() {
                     .padding(horizontal = 20.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-
-                Image(
-                    painter = painterResource(id = R.drawable.icon),
-                    contentDescription = "Profile",
+                Box(
                     modifier = Modifier
                         .size(125.dp)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
-                )
+                        .clickable { imagePickerLauncher.launch("image/*") },
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (imageUri != null) {
+                        Image(
+                            painter = rememberAsyncImagePainter(imageUri),
+                            contentDescription = "Profile",
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Image(
+                            painter = painterResource(id = R.drawable.placeholder),
+                            contentDescription = "Profile",
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+
+                    if (isUploading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .align(Alignment.Center),
+                            color = Color.White
+                        )
+                    }
+
+                    Icon(
+                        painter = painterResource(R.drawable.baseline_menu_24),
+                        contentDescription = "Edit Profile Picture",
+                        tint = Color.White,
+                        modifier = Modifier
+                            .size(30.dp)
+                            .align(Alignment.BottomEnd)
+                            .background(Color(0xFF00A36C), CircleShape)
+                            .padding(6.dp)
+                    )
+                }
 
                 Spacer(modifier = Modifier.width(20.dp))
 
@@ -108,9 +188,7 @@ fun ProfileScreen() {
                     fontSize = 30.sp,
                     fontWeight = FontWeight.Bold
                 )
-
                 Spacer(modifier = Modifier.height(4.dp))
-
                 Text(
                     text = "I read books.",
                     fontSize = 15.sp,
@@ -132,7 +210,7 @@ fun ProfileScreen() {
         }
 
         item {
-            Divider(color = Color(0xFFEAEAEA), thickness = 1.dp)
+            HorizontalDivider(color = Color(0xFFEAEAEA), thickness = 1.dp)
         }
 
         item {
@@ -145,27 +223,25 @@ fun ProfileScreen() {
                     text = "Wish List",
                     selected = selectedTab == 0,
                     modifier = Modifier.weight(1f)
-                ) { selectedTab = 0 }
-
+                ) {
+                    selectedTab = 0
+                }
                 Spacer(modifier = Modifier.width(10.dp))
-
                 TabButton(
                     text = "My Reviews",
                     selected = selectedTab == 1,
                     modifier = Modifier.weight(1f)
-                ) { selectedTab = 1 }
+                ) {
+                    selectedTab = 1
+                }
             }
         }
 
         if (selectedTab == 1) {
-
-            val reviews = listOf(1, 2, 3, 4, 5)
-
-            items(reviews) {
+            items(5) { // Fixed: Using items(count) syntax
                 ReviewCard()
                 Spacer(modifier = Modifier.height(16.dp))
             }
-
         } else {
             item {
                 WishListPlaceholder()
@@ -216,7 +292,6 @@ fun TabButton(
 
 @Composable
 fun ReviewCard() {
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -225,12 +300,10 @@ fun ReviewCard() {
             .background(Color.White, RoundedCornerShape(18.dp))
             .padding(16.dp)
     ) {
-
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-
             Row {
                 Image(
                     painter = painterResource(id = R.drawable.godofruin),
@@ -240,38 +313,29 @@ fun ReviewCard() {
                         .clip(RoundedCornerShape(10.dp)),
                     contentScale = ContentScale.Crop
                 )
-
                 Spacer(modifier = Modifier.width(14.dp))
-
                 Column(modifier = Modifier.weight(1f)) {
-
                     Text("20/12/2020", fontSize = 12.sp, color = Color.Gray)
-
                     Spacer(modifier = Modifier.height(4.dp))
-
                     Text(
                         text = "Great Book",
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Bold
                     )
-
                     Row {
                         repeat(5) {
                             Text("⭐", fontSize = 13.sp)
                         }
                     }
-
                     Spacer(modifier = Modifier.height(6.dp))
-
                     Text(
-                        text = "Honestly, I can’t get over them. The fact that I wanted to cry after reading Landon’s letter to Mia and learning they're having a baby made me want to upgrade my rating from 4.5 to 5 stars",
+                        text = "Honestly, I can't get over them. The fact that I wanted to cry after reading Landon's letter to Mia and learning they're having a baby made me want to upgrade my rating from 4.5 to 5 stars",
                         fontSize = 12.sp,
                         color = Color.Gray,
                         maxLines = 3
                     )
                 }
             }
-
             Icon(
                 Icons.Default.MoreVert,
                 contentDescription = null,
@@ -296,9 +360,3 @@ fun WishListPlaceholder() {
         )
     }
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//fun PreviewProfileScreen() {
-//    ProfileScreen()
-//}

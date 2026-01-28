@@ -26,4 +26,8 @@ interface ReviewRepo {
 
 
 
+    fun deleteReview(reviewId: String, callback: (Boolean) -> Unit)
+
+
+
 }

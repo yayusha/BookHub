@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Sem3Project">
+        android:theme="@style/Theme.Sen3Project">
 
         <activity
-            android:name=".view.RegistrationActivity"
-            android:exported="true"
-            android:label="Login"
-            android:theme="@style/Theme.Sem3Project">
+            android:name=".view.LoginActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -21,22 +21,26 @@
         </activity>
 
         <activity
+            android:name=".view.UserDashboard"
+            android:exported="true" />
+
+        <activity
             android:name=".view.AdminDashboard"
             android:exported="true"
-            android:label="Admin Dashboard"
-            android:theme="@style/Theme.Sem3Project" />
+            android:label="@string/title_activity_admin_dashboard" />
 
         <activity
             android:name=".view.AddBook"
             android:exported="true"
-            android:label="Add Book"
-            android:theme="@style/Theme.Sem3Project" />
+            android:label="Add Book" />
 
-        <activity android:name=".view.Details" android:exported="true" />
-        <activity android:name=".view.Forget" android:exported="false" />
-        <activity android:name=".view.UserDashboard" android:exported="true" />
-        <activity android:name=".view.MainActivity" android:exported="false" />
-        <activity android:name=".view.LoginActivity" />
+        <activity
+            android:name=".view.RegistrationActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".view.Forget"
+            android:exported="false" />
 
     </application>
 
