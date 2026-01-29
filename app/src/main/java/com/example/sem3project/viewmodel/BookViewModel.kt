@@ -89,8 +89,9 @@ class BookViewModel(
             _dashboardBooks.postValue(originalList)
         } else {
             _dashboardBooks.postValue(
-                originalList.filter {
-                    it.genreId.equals(genreId, ignoreCase = true)
+                originalList.filter { book ->
+                    // This checks if the genreId contains the word (e.g., "Fiction" inside "Mythological, Fiction")
+                    book.genreId.contains(genreId, ignoreCase = true)
                 }
             )
         }
@@ -114,5 +115,23 @@ class BookViewModel(
             .child(bookId)
 
         ref.setValue(true)
+    }
+
+    fun clearFilters() {
+        _dashboardBooks.postValue(originalList)
+    }
+
+    fun filterByTitle(query: String) {
+        if (query.isEmpty()) {
+            // Reset to full list
+            _dashboardBooks.postValue(originalList)
+        } else {
+            // Filter originalList and post to dashboardBooks
+            val filteredList = originalList.filter { book ->
+                book.bookName.contains(query, ignoreCase = true) ||
+                        book.author.contains(query, ignoreCase = true)
+            }
+            _dashboardBooks.postValue(filteredList)
+        }
     }
 }
