@@ -146,7 +146,7 @@ fun ReviewScreen(
             text = { Text("This will permanently remove the review for violation of guidelines.") },
             confirmButton = {
                 TextButton(onClick = {
-                    reviewToDelete?.let { viewModel.deleteReview(it.id) }
+                    reviewToDelete?.let { viewModel.deleteReview(it.reviewId, it.bookId) }
                     showDeleteDialog = false
                     reviewToDelete = null
                 }) {

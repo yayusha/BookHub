@@ -16,22 +16,14 @@ class ReviewViewModel(val repo: ReviewRepo= ReviewRepoImpl()): ViewModel() {
     private val _deleteStatus = mutableStateOf<String?>(null)
     val deleteStatus: State<String?> = _deleteStatus
 
-    init {
-        fetchReviews()
-    }
 
     fun fetchReviews(){
         repo.fetchReviews { items ->
             _reviews.value =items
+            _isLoading.value = false
         }
     }
 
-    fun saveOrUpdateReview(review: ReviewModel, isEdit: Boolean, callback: (Boolean) -> Unit) {
-        repo.saveOrUpdateReview(review, isEdit) { success ->
-            if (success) fetchReviews()
-            callback(success)
-        }
-    }
 
     fun toggleBookInList(userId: String, bookId: String,
                          currentStatus: Boolean, callback: (Boolean) -> Unit){
@@ -44,23 +36,41 @@ class ReviewViewModel(val repo: ReviewRepo= ReviewRepoImpl()): ViewModel() {
         repo.rateBook(bookId, rating, callback)
     }
 
-    fun addReview(review: ReviewModel, onResult: (Boolean) -> Unit) {
+    fun addReview(
+        review: ReviewModel,
+        bookId: String,
+        onResult: (Boolean) -> Unit
+    ) {
         repo.addReview(review) { success ->
-            if (success) fetchReviews()
+            if (success) {
+                fetchBookSpecificReviews(bookId)
+            }
             onResult(success)
         }
     }
 
-    fun deleteReview(reviewId: String) {
+    fun saveOrUpdateReview(
+        review: ReviewModel,
+        isEdit: Boolean,
+        bookId: String,
+        callback: (Boolean) -> Unit
+    ) {
+        repo.saveOrUpdateReview(review, isEdit) { success ->
+            if (success) {
+                fetchBookSpecificReviews(bookId)
+            }
+            callback(success)
+        }
+    }
+
+    fun deleteReview(reviewId: String, bookId: String) {
         repo.deleteReview(reviewId) { success ->
             if (success) {
-                _deleteStatus.value = "Review deleted successfully"
-                fetchReviews()
-            } else {
-                _deleteStatus.value = "Failed to delete review"
+                fetchBookSpecificReviews(bookId)
             }
         }
     }
+
 
     fun clearDeleteStatus() {
         _deleteStatus.value = null

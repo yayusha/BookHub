@@ -13,7 +13,7 @@ class ReviewRepoImpl : ReviewRepo {
         database.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val items = snapshot.children.mapNotNull { data ->
-                    data.getValue(ReviewModel::class.java)?.copy(id = data.key ?: "")
+                    data.getValue(ReviewModel::class.java)?.copy(reviewId = data.key ?: "")
                 }
                 callback(items)
             }
@@ -26,19 +26,27 @@ class ReviewRepoImpl : ReviewRepo {
 
     override fun addReview(review: ReviewModel, callback: (Boolean) -> Unit) {
         val reviewId = database.push().key ?: ""
-        val finalReview = review.copy(id = reviewId)
+        val finalReview = review.copy(reviewId = reviewId)
 
         database.child(reviewId).setValue(finalReview)
             .addOnSuccessListener { callback(true) }
             .addOnFailureListener { callback(false) }
     }
 
-    override fun saveOrUpdateReview(review: ReviewModel, isEdit: Boolean, callback: (Boolean) -> Unit) {
-        val ref = if (isEdit && review.id.isNotEmpty()) database.child(review.id) else database.push()
-        val finalReview = if (isEdit) review else review.copy(id = ref.key ?: "")
+    override fun saveOrUpdateReview(
+        review: ReviewModel,
+        isEdit: Boolean,
+        callback: (Boolean) -> Unit
+    ) {
+        val ref = if (isEdit && review.reviewId.isNotEmpty()) database.child(review.reviewId)
+        else database.push()
+
+        val finalReview = if (isEdit) review else review.copy(reviewId = ref.key ?: "")
+
         ref.setValue(finalReview)
             .addOnCompleteListener { callback(it.isSuccessful) }
     }
+
 
     override fun toggleBookInList(userId: String, bookId: String, currentStatus: Boolean, callback: (Boolean) -> Unit) {
         val ref = userListDb.child(userId).child(bookId)
@@ -82,7 +90,7 @@ class ReviewRepoImpl : ReviewRepo {
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val items = snapshot.children.mapNotNull { data ->
-                        data.getValue(ReviewModel::class.java)?.copy(id = data.key ?: "")
+                        data.getValue(ReviewModel::class.java)?.copy(reviewId = data.key ?: "")
                     }
                     callback(items)
                 }
