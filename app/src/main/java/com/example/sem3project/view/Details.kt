@@ -3,6 +3,7 @@ package com.example.sem3project.view
 import android.app.Activity
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -14,6 +15,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.*
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -28,12 +30,12 @@ import coil.compose.AsyncImage
 import com.example.sem3project.R
 import com.example.sem3project.model.ReplyModel
 import com.example.sem3project.model.ReviewModel
-import com.example.sem3project.model.WishlistBook // Added Import
+import com.example.sem3project.model.WishlistBook
 import com.example.sem3project.repo.BookRepoImpl
 import com.example.sem3project.viewmodel.BookViewModel
 import com.example.sem3project.viewmodel.BookViewModelFactory
 import com.example.sem3project.viewmodel.ReviewViewModel
-import com.google.firebase.auth.FirebaseAuth // Added Import
+import com.google.firebase.auth.FirebaseAuth
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -42,7 +44,6 @@ import java.util.*
 fun BookDetailsScreen(
     bookId: String,
     navController: NavController,
-    // FIXED: Using real Firebase Auth ID instead of hardcoded "abc123"
     currentUserId: String = FirebaseAuth.getInstance().currentUser?.uid ?: "",
     bookViewModel: BookViewModel = viewModel(
         factory = BookViewModelFactory(BookRepoImpl())
@@ -59,6 +60,7 @@ fun BookDetailsScreen(
     // --- State Management ---
     var selectedTab by remember { mutableStateOf("Summary") }
     var showReviewDialog by remember { mutableStateOf(false) }
+    var showAuthorSheet by remember { mutableStateOf(false) }
 
     var reviewToEdit by remember { mutableStateOf<ReviewModel?>(null) }
     var reviewToDelete by remember { mutableStateOf<ReviewModel?>(null) }
@@ -124,16 +126,23 @@ fun BookDetailsScreen(
                         Spacer(modifier = Modifier.height(12.dp))
 
                         Text(book.bookName, fontSize = 22.sp, fontWeight = FontWeight.Bold)
-                        Text(book.author, color = hubGreen)
+
+                        // --- CLICKABLE AUTHOR NAME ---
+                        Text(
+                            text = book.author,
+                            color = hubGreen,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .clickable { showAuthorSheet = true }
+                                .padding(4.dp)
+                        )
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // --- ACTION BUTTONS (Wishlist & Read) ---
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
                         ) {
-                            // Wishlist Button - UPDATED to save full object for Profile
                             OutlinedButton(
                                 onClick = {
                                     val wishlistBook = WishlistBook(
@@ -141,7 +150,6 @@ fun BookDetailsScreen(
                                         title = book.bookName,
                                         coverImageUrl = book.imageUrl
                                     )
-                                    // Make sure your ViewModel now accepts 3 parameters: (String, String, WishlistBook)
                                     bookViewModel.toggleWishlist(book.bookId, currentUserId, wishlistBook)
                                     Toast.makeText(context, "Wishlist Updated", Toast.LENGTH_SHORT).show()
                                 },
@@ -149,16 +157,11 @@ fun BookDetailsScreen(
                                 colors = ButtonDefaults.outlinedButtonColors(contentColor = hubGreen),
                                 border = androidx.compose.foundation.BorderStroke(1.dp, hubGreen)
                             ) {
-                                Icon(
-                                    painterResource(id = R.drawable.outline_book_24),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
-                                )
+                                Icon(painterResource(id = R.drawable.outline_book_24), null, modifier = Modifier.size(18.dp))
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text("Wishlist", fontSize = 12.sp)
                             }
 
-                            // Mark as Read Button
                             Button(
                                 onClick = {
                                     bookViewModel.toggleReadStatus(book.bookId, currentUserId)
@@ -167,11 +170,7 @@ fun BookDetailsScreen(
                                 shape = RoundedCornerShape(8.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = hubGreen)
                             ) {
-                                Icon(
-                                    painterResource(id = R.drawable.outline_check_circle_24),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
-                                )
+                                Icon(painterResource(id = R.drawable.outline_check_circle_24), null, modifier = Modifier.size(18.dp))
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text("Read", fontSize = 12.sp)
                             }
@@ -182,23 +181,14 @@ fun BookDetailsScreen(
 
             item {
                 TabRow(selectedTabIndex = if (selectedTab == "Summary") 0 else 1) {
-                    Tab(
-                        selected = selectedTab == "Summary",
-                        onClick = { selectedTab = "Summary" },
-                        text = { Text("Summary") })
-                    Tab(
-                        selected = selectedTab == "Reviews",
-                        onClick = { selectedTab = "Reviews" },
-                        text = { Text("Reviews (${reviewList.size})") })
+                    Tab(selected = selectedTab == "Summary", onClick = { selectedTab = "Summary" }, text = { Text("Summary") })
+                    Tab(selected = selectedTab == "Reviews", onClick = { selectedTab = "Reviews" }, text = { Text("Reviews (${reviewList.size})") })
                 }
             }
 
             if (selectedTab == "Summary") {
                 item {
-                    Text(
-                        selectedBook?.summary ?: "No summary available.",
-                        modifier = Modifier.padding(20.dp)
-                    )
+                    Text(selectedBook?.summary ?: "No summary available.", modifier = Modifier.padding(20.dp))
                 }
             } else {
                 items(reviewList) { review ->
@@ -217,7 +207,48 @@ fun BookDetailsScreen(
         }
     }
 
-    // --- DIALOGS (Remain the same as your original) ---
+    // --- AUTHOR INFO BOTTOM SHEET ---
+    if (showAuthorSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showAuthorSheet = false },
+            containerColor = Color.White
+        ) {
+            selectedBook?.let { book ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp)
+                        .padding(bottom = 40.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text("About the Author", fontSize = 14.sp, color = Color.Gray)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(book.author, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    HorizontalDivider(thickness = 1.dp, color = Color(0xFFEEEEEE))
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = if (book.authorBio.isNullOrBlank())
+                            "Biography for ${book.author} is currently being curated. This author is a key contributor to the library's collection."
+                        else book.authorBio,
+                        fontSize = 15.sp,
+                        lineHeight = 22.sp,
+                        color = Color.DarkGray
+                    )
+                    Spacer(modifier = Modifier.height(32.dp))
+                    Button(
+                        onClick = { showAuthorSheet = false },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = hubGreen)
+                    ) {
+                        Text("Close", color = Color.White)
+                    }
+                }
+            }
+        }
+    }
+
+    // --- REVIEW DIALOGS ---
     if (showReviewDialog || reviewToEdit != null) {
         val editing = reviewToEdit != null
         val review = reviewToEdit
@@ -305,7 +336,6 @@ fun BookDetailsScreen(
         )
     }
 }
-
 
 @Composable
 fun ReviewItemUi(
