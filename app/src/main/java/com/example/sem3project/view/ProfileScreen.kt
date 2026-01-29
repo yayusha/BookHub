@@ -28,6 +28,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.sem3project.R
 import com.example.sem3project.model.ReviewModel
@@ -40,9 +41,12 @@ import com.example.sem3project.repo.ImageRepoImpl
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 
-// REMOVE NavHostController if you aren't using it for other screens
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(
+    navController: NavHostController, // Added to match navigation
+    isDarkMode: Boolean,              // New parameter for theme state
+    onThemeChange: (Boolean) -> Unit  // New parameter for toggle logic
+) {
     val context = LocalContext.current
     val auth = FirebaseAuth.getInstance()
     val currentUserId = auth.currentUser?.uid ?: ""
@@ -72,7 +76,6 @@ fun ProfileScreen() {
         }
     }
 
-    // --- HELPER FUNCTION FOR ACTIVITY NAVIGATION ---
     fun navigateToActivity(activityClass: Class<*>) {
         val intent = Intent(context, activityClass)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -92,25 +95,37 @@ fun ProfileScreen() {
     }
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize().background(Color.White),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background), // Uses theme background
         contentPadding = PaddingValues(bottom = 20.dp)
     ) {
         // ---------------- TOP BAR ----------------
         item {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Icon(
                     painter = painterResource(R.drawable.baseline_arrow_back_24),
                     contentDescription = "Back",
-                    modifier = Modifier.size(26.dp).clickable { /* Handle Back */ }
+                    tint = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier
+                        .size(26.dp)
+                        .clickable { navController.popBackStack() }
                 )
-                Text("Profile", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    "Profile",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
                 Box {
                     IconButton(onClick = { menuExpanded = true }) {
-                        Icon(Icons.Default.MoreVert, "Menu")
+                        Icon(Icons.Default.MoreVert, "Menu", tint = MaterialTheme.colorScheme.onBackground)
                     }
                     DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
                         DropdownMenuItem(
@@ -118,7 +133,6 @@ fun ProfileScreen() {
                             onClick = {
                                 menuExpanded = false
                                 auth.signOut()
-                                // REPLACE LoginActivity::class.java with your actual Login Activity name
                                 navigateToActivity(com.example.sem3project.view.LoginActivity::class.java)
                             }
                         )
@@ -157,8 +171,47 @@ fun ProfileScreen() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 val fullName = "${profileData?.firstName ?: ""} ${profileData?.lastName ?: ""}".trim()
-                Text(fullName.ifEmpty { "User Name" }, fontSize = 26.sp, fontWeight = FontWeight.Bold)
-                Text(profileData?.email ?: "user@email.com", fontSize = 15.sp, color = Color.Gray)
+                Text(
+                    fullName.ifEmpty { "User Name" },
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                Text(
+                    profileData?.email ?: "user@email.com",
+                    fontSize = 15.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        // ---------------- THEME SWITCH ----------------
+        item {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            painter = painterResource(id = if (isDarkMode) R.drawable.baseline_dark_mode_24 else R.drawable.baseline_light_mode_24),
+                            contentDescription = if (isDarkMode) "Dark Mode" else "Light Mode",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(Modifier.width(12.dp))
+                        Text("Dark Mode", fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
+                    }
+                    Switch(
+                        checked = isDarkMode,
+                        onCheckedChange = { onThemeChange(it) }
+                    )
+                }
             }
         }
 
@@ -169,12 +222,12 @@ fun ProfileScreen() {
                 StatLarge(wishlist.size.toString(), "Wishlist")
                 StatLarge(readCount.toString(), "Books Read")
             }
-            Divider(color = Color(0xFFF0F0F0), thickness = 1.dp)
+            Divider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
         }
 
         // ---------------- TABS ----------------
         item {
-            Row(Modifier.fillMaxWidth().padding(20.dp)) {
+            Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 10.dp)) {
                 TabButton("Wish List", selectedTab == 0, Modifier.weight(1f)) { selectedTab = 0 }
                 Spacer(Modifier.width(10.dp))
                 TabButton("My Reviews", selectedTab == 1, Modifier.weight(1f)) { selectedTab = 1 }
@@ -203,7 +256,7 @@ fun ProfileScreen() {
         }
     }
 
-    // --- DEACTIVATE DIALOG (Temporary/Soft) ---
+    // --- DEACTIVATE DIALOG ---
     if (showDeactivateDialog) {
         AlertDialog(
             onDismissRequest = { showDeactivateDialog = false },
@@ -212,8 +265,7 @@ fun ProfileScreen() {
             confirmButton = {
                 TextButton(onClick = {
                     showDeactivateDialog = false
-                    auth.signOut() // Just sign out
-                    // Navigate to Registration Activity
+                    auth.signOut()
                     val intent = Intent(context, com.example.sem3project.view.RegistrationActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     context.startActivity(intent)
@@ -223,7 +275,7 @@ fun ProfileScreen() {
         )
     }
 
-    // --- DELETE DIALOG (Permanent/Hard Wipe) ---
+    // --- DELETE DIALOG ---
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
@@ -246,14 +298,10 @@ fun ProfileScreen() {
                     val user = auth.currentUser
                     if (user != null && deletePassword.isNotEmpty()) {
                         val credential = EmailAuthProvider.getCredential(user.email!!, deletePassword)
-
-                        // Security check
                         user.reauthenticate(credential).addOnCompleteListener { task ->
                             if (task.isSuccessful) {
-                                // 1. Wipe from Database
                                 profileViewModel.deleteProfile(currentUserId) { dbSuccess, _ ->
                                     if (dbSuccess) {
-                                        // 2. Delete from Auth
                                         user.delete().addOnCompleteListener { authTask ->
                                             if (authTask.isSuccessful) {
                                                 val intent = Intent(context, com.example.sem3project.view.RegistrationActivity::class.java)
@@ -275,25 +323,25 @@ fun ProfileScreen() {
     }
 }
 
-/* --- SUPPORTING COMPONENTS --- */
-
 @Composable
 fun StatLarge(value: String, label: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(value, fontSize = 26.sp, fontWeight = FontWeight.Bold)
-        Text(label, fontSize = 12.sp, color = Color.Gray)
+        Text(value, fontSize = 26.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
+        Text(label, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
 @Composable
 fun TabButton(text: String, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
     Box(
-        modifier = modifier.height(44.dp).clip(RoundedCornerShape(12.dp))
-            .background(if (selected) Color(0xFF00A36C) else Color(0xFFF0F0F0))
+        modifier = modifier
+            .height(44.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(if (selected) Color(0xFF00A36C) else MaterialTheme.colorScheme.surfaceVariant)
             .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
-        Text(text, color = if (selected) Color.White else Color.Black, fontWeight = FontWeight.Medium)
+        Text(text, color = if (selected) Color.White else MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Medium)
     }
 }
 
@@ -301,14 +349,14 @@ fun TabButton(text: String, selected: Boolean, modifier: Modifier, onClick: () -
 fun WishListItemRow(book: WishlistBook, onRemove: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF9F9F9))
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
             AsyncImage(model = book.coverImageUrl, contentDescription = null, modifier = Modifier.size(60.dp, 90.dp).clip(RoundedCornerShape(8.dp)), contentScale = ContentScale.Crop)
             Spacer(Modifier.width(16.dp))
             Column(Modifier.weight(1f)) {
-                Text(book.title, fontWeight = FontWeight.Bold)
-                Text("In Wishlist", fontSize = 12.sp, color = Color.Gray)
+                Text(book.title, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                Text("In Wishlist", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             IconButton(onClick = onRemove) { Icon(painterResource(R.drawable.outline_delete_24), "Remove", tint = Color.Red) }
         }
@@ -319,13 +367,13 @@ fun WishListItemRow(book: WishlistBook, onRemove: () -> Unit) {
 fun ReviewCard(review: ReviewModel) {
     Card(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF9F9F9))
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(Modifier.padding(16.dp)) {
-            Text(review.title, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Text(review.title, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
             Row { repeat(review.rating.toInt()) { Text("⭐") } }
             Spacer(Modifier.height(4.dp))
-            Text(review.content, fontSize = 13.sp, color = Color.DarkGray)
+            Text(review.content, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -333,6 +381,6 @@ fun ReviewCard(review: ReviewModel) {
 @Composable
 fun WishListPlaceholder(text: String) {
     Box(Modifier.fillMaxWidth().height(150.dp), Alignment.Center) {
-        Text(text, color = Color.Gray, fontSize = 14.sp)
+        Text(text, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
     }
 }

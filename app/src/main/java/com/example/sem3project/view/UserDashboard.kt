@@ -18,20 +18,39 @@ import androidx.navigation.compose.rememberNavController
 import com.example.sem3project.ui.theme.White20
 import com.example.sem3project.ui.theme.green20
 import com.example.sem3project.R
+import com.example.sem3project.ui.theme.Sem3ProjectTheme
+import com.example.sem3project.utils.ThemePreferences
 
 class UserDashboard : ComponentActivity() {
+    private lateinit var themePreferences: ThemePreferences
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        themePreferences = ThemePreferences(this)
+        
         enableEdgeToEdge()
         setContent {
-            DashboardBody()
+            var isDarkMode by remember { mutableStateOf(themePreferences.isDarkMode()) }
+            
+            Sem3ProjectTheme(darkTheme = isDarkMode) {
+                DashboardBody(
+                    isDarkMode = isDarkMode,
+                    onThemeChange = { newMode ->
+                        isDarkMode = newMode
+                        themePreferences.setDarkMode(newMode)
+                    }
+                )
+            }
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashboardBody() {
+fun DashboardBody(
+    isDarkMode: Boolean = false,
+    onThemeChange: (Boolean) -> Unit = {}
+) {
 
     val context = LocalContext.current
     val activity = context as Activity
@@ -119,7 +138,11 @@ fun DashboardBody() {
                     }
                 }
                 1 -> NotificationScreen(currentUserId = currentUid)
-                2 -> ProfileScreen()
+                2 -> ProfileScreen(
+                    navController = navController,
+                    isDarkMode = isDarkMode,
+                    onThemeChange = onThemeChange
+                )
             }
         }
     }

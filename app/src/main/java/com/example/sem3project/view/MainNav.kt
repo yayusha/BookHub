@@ -11,7 +11,10 @@ import com.example.sem3project.view.HomeScreen
 
 
 @Composable
-fun MainNav() {
+fun MainNav(
+    isDarkMode: Boolean,
+    onThemeChange: (Boolean) -> Unit
+) {
     val navController = rememberNavController()
     val auth = FirebaseAuth.getInstance()
     val currentUid = auth.currentUser?.uid ?: ""
@@ -20,18 +23,26 @@ fun MainNav() {
         composable("home") {
             HomeScreen(navController)
         }
+
         composable("detail/{bookId}") { backStackEntry ->
             val bookId = backStackEntry.arguments?.getString("bookId") ?: ""
-
             BookDetailsScreen(
                 bookId = bookId,
                 navController = navController,
                 currentUserId = currentUid
             )
         }
+
         composable("notifications") {
-            NotificationScreen(
-                currentUserId = currentUid
+            NotificationScreen(currentUserId = currentUid)
+        }
+
+        // ADD THIS: Route for your Profile/Settings
+        composable("profile") {
+            ProfileScreen(
+                navController = navController,
+                isDarkMode = isDarkMode,
+                onThemeChange = onThemeChange
             )
         }
     }

@@ -47,7 +47,7 @@
 <!--        <activity android:name=".view.Details" android:exported="true" />-->
 
         <!-- Optional -->
-        <activity android:name=".view.MainActivity" android:exported="false" />
+<!--        <activity android:name=".view.MainActivity" android:exported="false" />-->
 
     </application>
 
