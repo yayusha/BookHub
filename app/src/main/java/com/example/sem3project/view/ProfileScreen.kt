@@ -1,10 +1,9 @@
 package com.example.sem3project.view
 
-import android.net.Uri
+import android.content.Intent
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -16,10 +15,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -28,72 +27,66 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.rememberAsyncImagePainter
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.example.sem3project.R
-import com.example.sem3project.repo.ImageRepoImpl
+import com.example.sem3project.model.ReviewModel
+import com.example.sem3project.model.WishlistBook
+import com.example.sem3project.repo.ProfileRepoImpl
 import com.example.sem3project.viewmodel.ImageViewModel
+import com.example.sem3project.viewmodel.ProfileViewModel
+import com.example.sem3project.viewmodel.ProfileViewModelFactory
+import com.example.sem3project.repo.ImageRepoImpl
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
 
+// REMOVE NavHostController if you aren't using it for other screens
 @Composable
 fun ProfileScreen() {
     val context = LocalContext.current
     val auth = FirebaseAuth.getInstance()
-    val user = auth.currentUser
-    val userId = user?.uid
-    val dbRef = FirebaseDatabase.getInstance().reference.child("users")
+    val currentUserId = auth.currentUser?.uid ?: ""
 
-    // Firebase user info
-    var userName by remember { mutableStateOf("") }
-    var userEmail by remember { mutableStateOf("") }
-
-    // Image upload
+    val profileViewModel: ProfileViewModel = viewModel(
+        factory = ProfileViewModelFactory(ProfileRepoImpl())
+    )
     val imageViewModel = remember { ImageViewModel(ImageRepoImpl()) }
-    var imageUri by remember { mutableStateOf<Uri?>(null) }
-    var cloudinaryLink by remember { mutableStateOf("") }
-    var isUploading by remember { mutableStateOf(false) }
 
-    // UI state
-    var selectedTab by remember { mutableStateOf(1) }
+    val wishlist = profileViewModel.wishlist.value
+    val reviewCount = profileViewModel.reviewCount.value
+    val readCount = profileViewModel.readCount.value
+    val myReviews = profileViewModel.myReviews.value
+    val profileData by profileViewModel.profile.observeAsState()
+
+    var selectedTab by remember { mutableStateOf(0) }
     var menuExpanded by remember { mutableStateOf(false) }
     var showDeactivateDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var deletePassword by remember { mutableStateOf("") }
+    var isUploading by remember { mutableStateOf(false) }
 
-    // Load Firebase user info
-    LaunchedEffect(userId) {
-        if (userId != null) {
-            dbRef.child(userId).addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    if (snapshot.exists()) {
-                        val firstName =
-                            snapshot.child("firstName").getValue(String::class.java) ?: ""
-                        val lastName = snapshot.child("lastName").getValue(String::class.java) ?: ""
-                        userName = "$firstName $lastName"
-                        userEmail = snapshot.child("email").getValue(String::class.java) ?: ""
-                    }
-                }
-                override fun onCancelled(error: DatabaseError) {}
-            })
+    LaunchedEffect(currentUserId) {
+        if (currentUserId.isNotEmpty()) {
+            profileViewModel.loadUserData(currentUserId)
+            profileViewModel.getProfileById(currentUserId)
         }
     }
 
-    // Image picker
+    // --- HELPER FUNCTION FOR ACTIVITY NAVIGATION ---
+    fun navigateToActivity(activityClass: Class<*>) {
+        val intent = Intent(context, activityClass)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        context.startActivity(intent)
+    }
+
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
-        imageUri = uri
-        imageUri?.let {
+        uri?.let {
             isUploading = true
-            imageViewModel.uploadImage(context, it) { success, message ->
+            imageViewModel.uploadImage(context, it) { success, _ ->
                 isUploading = false
-                if (success) {
-                    cloudinaryLink = message.toString()
-                    Toast.makeText(context, "Profile picture updated!", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(context, "Upload failed: $message", Toast.LENGTH_SHORT).show()
-                }
+                if (success) Toast.makeText(context, "Image Updated!", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -112,32 +105,30 @@ fun ProfileScreen() {
                 Icon(
                     painter = painterResource(R.drawable.baseline_arrow_back_24),
                     contentDescription = "Back",
-                    modifier = Modifier.size(26.dp).clickable { /* TODO: handle back */ }
+                    modifier = Modifier.size(26.dp).clickable { /* Handle Back */ }
                 )
                 Text("Profile", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 Box {
-                    Icon(
-                        imageVector = Icons.Default.MoreVert,
-                        contentDescription = "Menu",
-                        modifier = Modifier.size(24.dp).clickable { menuExpanded = true }
-                    )
-                    DropdownMenu(
-                        expanded = menuExpanded,
-                        onDismissRequest = { menuExpanded = false }
-                    ) {
+                    IconButton(onClick = { menuExpanded = true }) {
+                        Icon(Icons.Default.MoreVert, "Menu")
+                    }
+                    DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
                         DropdownMenuItem(
-                            text = { Text("Deactivate Account") },
+                            text = { Text("Sign Out") },
                             onClick = {
                                 menuExpanded = false
-                                showDeactivateDialog = true
+                                auth.signOut()
+                                // REPLACE LoginActivity::class.java with your actual Login Activity name
+                                navigateToActivity(com.example.sem3project.view.LoginActivity::class.java)
                             }
                         )
                         DropdownMenuItem(
+                            text = { Text("Deactivate Account") },
+                            onClick = { menuExpanded = false; showDeactivateDialog = true }
+                        )
+                        DropdownMenuItem(
                             text = { Text("Delete Account", color = Color.Red) },
-                            onClick = {
-                                menuExpanded = false
-                                showDeleteDialog = true
-                            }
+                            onClick = { menuExpanded = false; showDeleteDialog = true }
                         )
                     }
                 }
@@ -146,33 +137,15 @@ fun ProfileScreen() {
 
         // ---------------- PROFILE IMAGE ----------------
         item {
-            Box(
-                modifier = Modifier
-                    .size(125.dp)
-                    .clip(CircleShape)
-                    .clickable { imagePickerLauncher.launch("image/*") },
-                contentAlignment = Alignment.Center
-            ) {
-                if (imageUri != null) {
-                    Image(
-                        painter = rememberAsyncImagePainter(imageUri),
+            Box(Modifier.fillMaxWidth().padding(vertical = 10.dp), Alignment.Center) {
+                Box(Modifier.size(125.dp).clip(CircleShape).clickable { imagePickerLauncher.launch("image/*") }) {
+                    AsyncImage(
+                        model = if (profileData?.imageUrl?.isNotEmpty() == true) profileData?.imageUrl else R.drawable.icon,
                         contentDescription = "Profile",
                         modifier = Modifier.fillMaxSize().clip(CircleShape),
                         contentScale = ContentScale.Crop
                     )
-                } else {
-                    Image(
-                        painter = painterResource(id = R.drawable.icon),
-                        contentDescription = "Profile",
-                        modifier = Modifier.fillMaxSize().clip(CircleShape),
-                        contentScale = ContentScale.Crop
-                    )
-                }
-                if (isUploading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(40.dp).align(Alignment.Center),
-                        color = Color.White
-                    )
+                    if (isUploading) CircularProgressIndicator(Modifier.align(Alignment.Center), color = Color.Green)
                 }
             }
         }
@@ -183,24 +156,21 @@ fun ProfileScreen() {
                 modifier = Modifier.fillMaxWidth().padding(top = 14.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(userName.ifEmpty { "Loading..." }, fontSize = 30.sp, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(4.dp))
-                Text(userEmail, fontSize = 15.sp, color = Color.Gray)
+                val fullName = "${profileData?.firstName ?: ""} ${profileData?.lastName ?: ""}".trim()
+                Text(fullName.ifEmpty { "User Name" }, fontSize = 26.sp, fontWeight = FontWeight.Bold)
+                Text(profileData?.email ?: "user@email.com", fontSize = 15.sp, color = Color.Gray)
             }
         }
 
         // ---------------- STATS ----------------
         item {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                StatLarge("5", "Books Reviewed")
-                StatLarge("15", "Books Read")
+            Row(Modifier.fillMaxWidth().padding(vertical = 24.dp), Arrangement.SpaceEvenly) {
+                StatLarge(reviewCount.toString(), "My Reviews")
+                StatLarge(wishlist.size.toString(), "Wishlist")
+                StatLarge(readCount.toString(), "Books Read")
             }
+            Divider(color = Color(0xFFF0F0F0), thickness = 1.dp)
         }
-
-        item { Divider(color = Color(0xFFEAEAEA), thickness = 1.dp) }
 
         // ---------------- TABS ----------------
         item {
@@ -211,87 +181,102 @@ fun ProfileScreen() {
             }
         }
 
-        // ---------------- CONTENT ----------------
-        if (selectedTab == 1) {
-            items(listOf(1, 2, 3, 4, 5)) {
-                ReviewCard()
-                Spacer(Modifier.height(16.dp))
+        // ---------------- LIST CONTENT ----------------
+        if (selectedTab == 0) {
+            if (wishlist.isEmpty()) {
+                item { WishListPlaceholder("Your wishlist is empty.") }
+            } else {
+                items(wishlist) { book ->
+                    WishListItemRow(book) { profileViewModel.removeFromWishlist(currentUserId, book.id) }
+                    Spacer(Modifier.height(12.dp))
+                }
             }
         } else {
-            item { WishListPlaceholder() }
+            if (myReviews.isEmpty()) {
+                item { WishListPlaceholder("No reviews written yet.") }
+            } else {
+                items(myReviews) { review ->
+                    ReviewCard(review)
+                    Spacer(Modifier.height(16.dp))
+                }
+            }
         }
     }
 
-    // ---------------- DEACTIVATE DIALOG ----------------
+    // --- DEACTIVATE DIALOG (Temporary/Soft) ---
     if (showDeactivateDialog) {
         AlertDialog(
             onDismissRequest = { showDeactivateDialog = false },
             title = { Text("Deactivate Account") },
-            text = { Text("Are you sure you want to deactivate your account? You can reactivate anytime by logging in again.") },
+            text = { Text("You will be signed out. You can log back in anytime to reactivate your profile.") },
             confirmButton = {
-                TextButton(onClick = { showDeactivateDialog = false }) { Text("Deactivate") }
+                TextButton(onClick = {
+                    showDeactivateDialog = false
+                    auth.signOut() // Just sign out
+                    // Navigate to Registration Activity
+                    val intent = Intent(context, com.example.sem3project.view.RegistrationActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    context.startActivity(intent)
+                }) { Text("Deactivate") }
             },
-            dismissButton = {
-                TextButton(onClick = { showDeactivateDialog = false }) { Text("Cancel") }
-            }
+            dismissButton = { TextButton(onClick = { showDeactivateDialog = false }) { Text("Cancel") } }
         )
     }
 
-    // ---------------- DELETE ACCOUNT DIALOG ----------------
+    // --- DELETE DIALOG (Permanent/Hard Wipe) ---
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Delete Account") },
+            title = { Text("Delete Permanently", color = Color.Red) },
             text = {
                 Column {
-                    Text(
-                        "This will permanently delete your account and all your data. " +
-                        "This action CANNOT be undone.\n\nPlease enter your password to confirm."
-                    )
-                    Spacer(Modifier.height(12.dp))
+                    Text("Warning: This will wipe all your reviews and wishlist forever. Enter password to confirm.")
+                    Spacer(Modifier.height(10.dp))
                     OutlinedTextField(
                         value = deletePassword,
                         onValueChange = { deletePassword = it },
-                        label = { Text("Password") },
+                        label = { Text("Confirm Password") },
                         visualTransformation = PasswordVisualTransformation(),
-                        singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
             },
             confirmButton = {
-                TextButton(
-                    onClick = {
-                        val currentUser = FirebaseAuth.getInstance().currentUser
-                        val email = currentUser?.email
-                        if (currentUser != null && email != null && deletePassword.isNotBlank()) {
-                            val credential = EmailAuthProvider.getCredential(email, deletePassword)
-                            currentUser.reauthenticate(credential).addOnCompleteListener { authTask ->
-                                if (authTask.isSuccessful) {
-                                    val uid = currentUser.uid
-                                    FirebaseDatabase.getInstance().reference.child("users").child(uid).removeValue()
-                                    currentUser.delete().addOnCompleteListener { deleteTask ->
-                                        if (deleteTask.isSuccessful) {
-                                            showDeleteDialog = false
-                                            deletePassword = ""
-                                            println("Account deleted successfully")
-                                            // TODO: navigate to login
-                                        } else deleteTask.exception?.printStackTrace()
+                TextButton(onClick = {
+                    val user = auth.currentUser
+                    if (user != null && deletePassword.isNotEmpty()) {
+                        val credential = EmailAuthProvider.getCredential(user.email!!, deletePassword)
+
+                        // Security check
+                        user.reauthenticate(credential).addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                // 1. Wipe from Database
+                                profileViewModel.deleteProfile(currentUserId) { dbSuccess, _ ->
+                                    if (dbSuccess) {
+                                        // 2. Delete from Auth
+                                        user.delete().addOnCompleteListener { authTask ->
+                                            if (authTask.isSuccessful) {
+                                                val intent = Intent(context, com.example.sem3project.view.RegistrationActivity::class.java)
+                                                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                                context.startActivity(intent)
+                                            }
+                                        }
                                     }
-                                } else authTask.exception?.printStackTrace()
+                                }
+                            } else {
+                                Toast.makeText(context, "Wrong Password", Toast.LENGTH_SHORT).show()
                             }
                         }
                     }
-                ) { Text("Delete", color = Color.Red) }
+                }) { Text("Delete Forever", color = Color.Red) }
             },
-            dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false; deletePassword = "" }) { Text("Cancel") }
-            }
+            dismissButton = { TextButton(onClick = { showDeleteDialog = false }) { Text("Cancel") } }
         )
     }
 }
 
-/* ---------------- COMPONENTS ---------------- */
+/* --- SUPPORTING COMPONENTS --- */
+
 @Composable
 fun StatLarge(value: String, label: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -303,64 +288,51 @@ fun StatLarge(value: String, label: String) {
 @Composable
 fun TabButton(text: String, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
     Box(
-        modifier = modifier
-            .height(44.dp)
-            .clip(RoundedCornerShape(12.dp))
+        modifier = modifier.height(44.dp).clip(RoundedCornerShape(12.dp))
             .background(if (selected) Color(0xFF00A36C) else Color(0xFFF0F0F0))
             .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
-        Text(text, color = if (selected) Color.White else Color.Black, fontSize = 15.sp, fontWeight = FontWeight.Medium)
+        Text(text, color = if (selected) Color.White else Color.Black, fontWeight = FontWeight.Medium)
     }
 }
 
 @Composable
-fun ReviewCard() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .shadow(2.dp, RoundedCornerShape(18.dp))
-            .background(Color.White, RoundedCornerShape(18.dp))
-            .padding(16.dp)
+fun WishListItemRow(book: WishlistBook, onRemove: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF9F9F9))
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row {
-                Image(
-                    painter = painterResource(id = R.drawable.godofruin),
-                    contentDescription = null,
-                    modifier = Modifier.size(80.dp).clip(RoundedCornerShape(10.dp)),
-                    contentScale = ContentScale.Crop
-                )
-                Spacer(Modifier.width(14.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text("20/12/2020", fontSize = 12.sp, color = Color.Gray)
-                    Spacer(Modifier.height(4.dp))
-                    Text("Great Book", fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                    Row { repeat(5) { Text("⭐", fontSize = 13.sp) } }
-                    Spacer(Modifier.height(6.dp))
-                    Text(
-                        text = "Honestly, I can’t get over them. The fact that I wanted to cry after reading Landon’s letter...",
-                        fontSize = 12.sp,
-                        color = Color.Gray,
-                        maxLines = 3
-                    )
-                }
+        Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            AsyncImage(model = book.coverImageUrl, contentDescription = null, modifier = Modifier.size(60.dp, 90.dp).clip(RoundedCornerShape(8.dp)), contentScale = ContentScale.Crop)
+            Spacer(Modifier.width(16.dp))
+            Column(Modifier.weight(1f)) {
+                Text(book.title, fontWeight = FontWeight.Bold)
+                Text("In Wishlist", fontSize = 12.sp, color = Color.Gray)
             }
-            Icon(Icons.Default.MoreVert, contentDescription = null, tint = Color.Gray)
+            IconButton(onClick = onRemove) { Icon(painterResource(R.drawable.outline_delete_24), "Remove", tint = Color.Red) }
         }
     }
 }
 
 @Composable
-fun WishListPlaceholder() {
-    Box(
-        modifier = Modifier.fillMaxWidth().height(200.dp),
-        contentAlignment = Alignment.Center
+fun ReviewCard(review: ReviewModel) {
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF9F9F9))
     ) {
-        Text("Your wishlist is empty.", color = Color.Gray, fontSize = 14.sp)
+        Column(Modifier.padding(16.dp)) {
+            Text(review.title, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Row { repeat(review.rating.toInt()) { Text("⭐") } }
+            Spacer(Modifier.height(4.dp))
+            Text(review.content, fontSize = 13.sp, color = Color.DarkGray)
+        }
+    }
+}
+
+@Composable
+fun WishListPlaceholder(text: String) {
+    Box(Modifier.fillMaxWidth().height(150.dp), Alignment.Center) {
+        Text(text, color = Color.Gray, fontSize = 14.sp)
     }
 }

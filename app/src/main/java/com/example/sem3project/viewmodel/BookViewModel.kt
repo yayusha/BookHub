@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.sem3project.model.BookModel
+import com.example.sem3project.model.WishlistBook
 import com.example.sem3project.repo.BookRepo
 import com.example.sem3project.utils.NotificationHelper
 import com.google.firebase.database.FirebaseDatabase
@@ -107,14 +108,12 @@ class BookViewModel(
         ref.setValue(true)
     }
 
-    fun toggleWishlist(bookId: String, userId: String) {
-        val ref = FirebaseDatabase.getInstance()
-            .getReference("user_activities")
-            .child(userId)
-            .child("wishlist")
-            .child(bookId)
+    fun toggleWishlist(bookId: String, userId: String, wishlistBook: WishlistBook) {
+        repo.toggleWishlist(bookId, userId, wishlistBook) { success ->
+            if (success) {
 
-        ref.setValue(true)
+            }
+        }
     }
 
     fun clearFilters() {
@@ -134,4 +133,5 @@ class BookViewModel(
             _dashboardBooks.postValue(filteredList)
         }
     }
+
 }

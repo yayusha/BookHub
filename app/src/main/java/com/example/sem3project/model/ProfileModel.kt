@@ -2,7 +2,8 @@ package com.example.sem3project.model
 
 data class ProfileModel(
     var userId: String = "",
-    var username: String = "",
+    var firstName: String = "",
+    var lastName: String = "",
     var email: String = "",
     var bio: String = "",
     var imageUrl: String = ""
@@ -10,7 +11,8 @@ data class ProfileModel(
     fun toMap(): Map<String, Any?> {
         return mapOf(
             "userId" to userId,
-            "username" to username,
+            "firstName" to firstName,
+            "lastName" to lastName,
             "email" to email,
             "bio" to bio,
             "imageUrl" to imageUrl,

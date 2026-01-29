@@ -1,6 +1,7 @@
 package com.example.sem3project.repo
 
 import com.example.sem3project.model.BookModel
+import com.example.sem3project.model.WishlistBook
 import com.google.firebase.database.*
 
 class BookRepoImpl : BookRepo {
@@ -99,6 +100,36 @@ class BookRepoImpl : BookRepo {
             }
 
             override fun onCancelled(error: DatabaseError) {}
+        })
+    }
+
+    override fun toggleWishlist(bookId: String, userId: String, book: WishlistBook, callback: (Boolean) -> Unit) {
+        val ref = FirebaseDatabase.getInstance().getReference("wishlist")
+            .child(userId)
+            .child(bookId)
+
+        ref.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    ref.removeValue().addOnCompleteListener { callback(it.isSuccessful) }
+                } else {
+                    ref.setValue(book).addOnCompleteListener { callback(it.isSuccessful) }
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {
+                callback(false)
+            }
+        })
+    }
+
+    override fun toggleReadStatus(bookId: String, userId: String, callback: (Boolean) -> Unit) {
+        val ref = FirebaseDatabase.getInstance().getReference("read_books").child(userId).child(bookId)
+        ref.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) ref.removeValue() else ref.setValue(true)
+                callback(true)
+            }
+            override fun onCancelled(e: DatabaseError) { callback(false) }
         })
     }
 

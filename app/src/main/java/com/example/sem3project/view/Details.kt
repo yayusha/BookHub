@@ -9,7 +9,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -29,10 +28,12 @@ import coil.compose.AsyncImage
 import com.example.sem3project.R
 import com.example.sem3project.model.ReplyModel
 import com.example.sem3project.model.ReviewModel
+import com.example.sem3project.model.WishlistBook // Added Import
 import com.example.sem3project.repo.BookRepoImpl
 import com.example.sem3project.viewmodel.BookViewModel
 import com.example.sem3project.viewmodel.BookViewModelFactory
 import com.example.sem3project.viewmodel.ReviewViewModel
+import com.google.firebase.auth.FirebaseAuth // Added Import
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -41,7 +42,8 @@ import java.util.*
 fun BookDetailsScreen(
     bookId: String,
     navController: NavController,
-    currentUserId: String = "abc123", // Replace with real Auth UID
+    // FIXED: Using real Firebase Auth ID instead of hardcoded "abc123"
+    currentUserId: String = FirebaseAuth.getInstance().currentUser?.uid ?: "",
     bookViewModel: BookViewModel = viewModel(
         factory = BookViewModelFactory(BookRepoImpl())
     ),
@@ -58,7 +60,6 @@ fun BookDetailsScreen(
     var selectedTab by remember { mutableStateOf("Summary") }
     var showReviewDialog by remember { mutableStateOf(false) }
 
-    // Dialog Triggers
     var reviewToEdit by remember { mutableStateOf<ReviewModel?>(null) }
     var reviewToDelete by remember { mutableStateOf<ReviewModel?>(null) }
     var reviewToReport by remember { mutableStateOf<ReviewModel?>(null) }
@@ -108,7 +109,6 @@ fun BookDetailsScreen(
                             .padding(16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        // Book Image
                         Card(
                             elevation = CardDefaults.cardElevation(8.dp),
                             shape = RoundedCornerShape(12.dp),
@@ -123,7 +123,6 @@ fun BookDetailsScreen(
 
                         Spacer(modifier = Modifier.height(12.dp))
 
-                        // Book Info
                         Text(book.bookName, fontSize = 22.sp, fontWeight = FontWeight.Bold)
                         Text(book.author, color = hubGreen)
 
@@ -132,17 +131,19 @@ fun BookDetailsScreen(
                         // --- ACTION BUTTONS (Wishlist & Read) ---
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(
-                                12.dp,
-                                Alignment.CenterHorizontally
-                            )
+                            horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
                         ) {
-                            // Wishlist Button
+                            // Wishlist Button - UPDATED to save full object for Profile
                             OutlinedButton(
                                 onClick = {
-                                    bookViewModel.toggleWishlist(book.bookId, currentUserId)
-                                    Toast.makeText(context, "Added to Wishlist", Toast.LENGTH_SHORT)
-                                        .show()
+                                    val wishlistBook = WishlistBook(
+                                        id = book.bookId,
+                                        title = book.bookName,
+                                        coverImageUrl = book.imageUrl
+                                    )
+                                    // Make sure your ViewModel now accepts 3 parameters: (String, String, WishlistBook)
+                                    bookViewModel.toggleWishlist(book.bookId, currentUserId, wishlistBook)
+                                    Toast.makeText(context, "Wishlist Updated", Toast.LENGTH_SHORT).show()
                                 },
                                 shape = RoundedCornerShape(8.dp),
                                 colors = ButtonDefaults.outlinedButtonColors(contentColor = hubGreen),
@@ -161,8 +162,7 @@ fun BookDetailsScreen(
                             Button(
                                 onClick = {
                                     bookViewModel.toggleReadStatus(book.bookId, currentUserId)
-                                    Toast.makeText(context, "Marked as Read", Toast.LENGTH_SHORT)
-                                        .show()
+                                    Toast.makeText(context, "Marked as Read", Toast.LENGTH_SHORT).show()
                                 },
                                 shape = RoundedCornerShape(8.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = hubGreen)
@@ -217,113 +217,58 @@ fun BookDetailsScreen(
         }
     }
 
-    // --- DIALOGS ---
-
-    // 1. ADD / EDIT DIALOG
+    // --- DIALOGS (Remain the same as your original) ---
     if (showReviewDialog || reviewToEdit != null) {
         val editing = reviewToEdit != null
         val review = reviewToEdit
-
-        // Use remember for temporary edits within the dialog
         var title by remember { mutableStateOf(review?.title ?: "") }
         var content by remember { mutableStateOf(review?.content ?: "") }
         var rating by remember { mutableStateOf(review?.rating?.toInt() ?: 5) }
 
         AlertDialog(
-            onDismissRequest = {
-                showReviewDialog = false
-                reviewToEdit = null
-            },
+            onDismissRequest = { showReviewDialog = false; reviewToEdit = null },
             title = { Text(if (editing) "Edit Review" else "Add Review") },
             text = {
                 Column {
-                    OutlinedTextField(
-                        value = title,
-                        onValueChange = { title = it },
-                        label = { Text("Title") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    OutlinedTextField(value = title, onValueChange = { title = it }, label = { Text("Title") }, modifier = Modifier.fillMaxWidth())
                     Spacer(modifier = Modifier.height(8.dp))
-                    OutlinedTextField(
-                        value = content,
-                        onValueChange = { content = it },
-                        label = { Text("Comment") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    OutlinedTextField(value = content, onValueChange = { content = it }, label = { Text("Comment") }, modifier = Modifier.fillMaxWidth())
                     Spacer(modifier = Modifier.height(16.dp))
-
-                    // --- STAR RATING ROW ---
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
                         Text("Rating: ", fontWeight = FontWeight.Bold)
                         for (i in 1..5) {
                             IconButton(onClick = { rating = i }) {
-                                Icon(
-                                    imageVector = Icons.Default.Star,
-                                    contentDescription = null,
-                                    tint = if (i <= rating) Color(0xFFFFD700) else Color.Gray
-                                )
+                                Icon(Icons.Default.Star, null, tint = if (i <= rating) Color(0xFFFFD700) else Color.Gray)
                             }
                         }
                     }
                 }
             },
             confirmButton = {
-                Button(
-                    onClick = {
-                        val finalReview = (review ?: ReviewModel()).copy(
-                            bookId = bookId,
-                            userId = currentUserId,
-                            title = title,
-                            content = content,
-                            rating = rating.toDouble(), // Properly saving the selected stars
-                            date = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date())
-                        )
-                        reviewViewModel.saveOrUpdateReview(finalReview, editing, bookId) {
-                            showReviewDialog = false
-                            reviewToEdit = null
-                        }
-                    },
-                    enabled = title.isNotBlank() && content.isNotBlank()
-                ) {
-                    Text("Submit")
-                }
+                Button(onClick = {
+                    val finalReview = (review ?: ReviewModel()).copy(
+                        bookId = bookId, userId = currentUserId, title = title, content = content,
+                        rating = rating.toDouble(), date = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date())
+                    )
+                    reviewViewModel.saveOrUpdateReview(finalReview, editing, bookId) {
+                        showReviewDialog = false; reviewToEdit = null
+                    }
+                }, enabled = title.isNotBlank() && content.isNotBlank()) { Text("Submit") }
             },
-            dismissButton = {
-                TextButton(onClick = {
-                    showReviewDialog = false
-                    reviewToEdit = null
-                }) {
-                    Text("Cancel")
-                }
-            }
+            dismissButton = { TextButton(onClick = { showReviewDialog = false; reviewToEdit = null }) { Text("Cancel") } }
         )
     }
-    // 2. REPLY DIALOG
+
     if (reviewToReply != null) {
         AlertDialog(
             onDismissRequest = { reviewToReply = null },
             title = { Text("Reply to Review") },
-            text = {
-                OutlinedTextField(
-                    value = replyInputText,
-                    onValueChange = { replyInputText = it },
-                    label = { Text("Your response") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            },
+            text = { OutlinedTextField(value = replyInputText, onValueChange = { replyInputText = it }, label = { Text("Your response") }, modifier = Modifier.fillMaxWidth()) },
             confirmButton = {
                 Button(onClick = {
                     reviewToReply?.let {
                         reviewViewModel.addReply(it, replyInputText, currentUserId) { success ->
-                            if (success) {
-                                Toast.makeText(context, "Reply sent!", Toast.LENGTH_SHORT).show()
-                                replyInputText = ""
-                                reviewToReply = null
-                            }
+                            if (success) { Toast.makeText(context, "Reply sent!", Toast.LENGTH_SHORT).show(); replyInputText = ""; reviewToReply = null }
                         }
                     }
                 }, enabled = replyInputText.isNotBlank()) { Text("Send") }
@@ -332,7 +277,6 @@ fun BookDetailsScreen(
         )
     }
 
-    // 3. DELETE DIALOG
     if (reviewToDelete != null) {
         AlertDialog(
             onDismissRequest = { reviewToDelete = null },
@@ -347,7 +291,6 @@ fun BookDetailsScreen(
         )
     }
 
-    // 4. REPORT DIALOG
     if (reviewToReport != null) {
         AlertDialog(
             onDismissRequest = { reviewToReport = null },
@@ -362,6 +305,7 @@ fun BookDetailsScreen(
         )
     }
 }
+
 
 @Composable
 fun ReviewItemUi(
