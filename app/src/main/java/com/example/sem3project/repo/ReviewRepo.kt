@@ -25,9 +25,10 @@ interface ReviewRepo {
     )
 
 
-
     fun deleteReview(reviewId: String, callback: (Boolean) -> Unit)
     fun updateReviewStatus(reviewId: String, isReported: Boolean, callback: (Boolean) -> Unit)
+
+    fun fetchReviewsByBook(bookId: String, callback: (List<ReviewModel>) -> Unit)
 
 
 }

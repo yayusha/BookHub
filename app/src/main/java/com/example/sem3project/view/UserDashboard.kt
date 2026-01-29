@@ -12,9 +12,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.example.sem3project.R
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.sem3project.ui.theme.White20
 import com.example.sem3project.ui.theme.green20
+import com.example.sem3project.R
 
 class UserDashboard : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,17 +48,16 @@ fun DashboardBody() {
         NavItem("Profile", R.drawable.baseline_person_24)
     )
 
+    val navController = rememberNavController()
+
     Scaffold(
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = green20,
-                    titleContentColor = White20,
-                    navigationIconContentColor = White20,
-                    actionIconContentColor = White20
+                    titleContentColor = White20
                 ),
                 title = { Text("BookHub") },
-
                 navigationIcon = {
                     IconButton(onClick = { }) {
                         Icon(
@@ -63,35 +65,22 @@ fun DashboardBody() {
                             contentDescription = "Menu"
                         )
                     }
-                },
-
-
+                }
             )
         },
-
         bottomBar = {
             NavigationBar {
                 listItems.forEachIndexed { index, item ->
                     NavigationBarItem(
                         selected = selectedIndex == index,
-                        onClick = {
-                            selectedIndex = index
-                            showSearch = false
-                        },
-                        icon = {
-                            Icon(
-                                painter = painterResource(item.icon),
-                                contentDescription = item.label
-                            )
-                        },
+                        onClick = { selectedIndex = index; showSearch = false },
+                        icon = { Icon(painter = painterResource(item.icon), contentDescription = item.label) },
                         label = { Text(item.label) }
                     )
                 }
             }
         }
-
     ) { paddingValues ->
-        // prevent "Infinite Height" layout issues
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -99,19 +88,29 @@ fun DashboardBody() {
         ) {
             when (selectedIndex) {
                 0 -> {
-                    Column {
-                        if (showSearch) {
-                            OutlinedTextField(
-                                value = searchText,
-                                onValueChange = { searchText = it },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(12.dp),
-                                label = { Text("Search books...") },
-                                singleLine = true
-                            )
+                    // NavHost inside Home tab
+                    NavHost(navController = navController, startDestination = "home") {
+                        composable("home") {
+                            Column {
+                                if (showSearch) {
+                                    OutlinedTextField(
+                                        value = searchText,
+                                        onValueChange = { searchText = it },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(12.dp),
+                                        label = { Text("Search books...") },
+                                        singleLine = true
+                                    )
+                                }
+                                HomeScreen(navController = navController)
+                            }
                         }
-                        Homescreen()
+                        composable("detail/{bookId}") { backStackEntry ->
+                            val bookId = backStackEntry.arguments?.getString("bookId") ?: ""
+                            BookDetailsScreen(bookId = bookId,
+                                navController = navController)
+                        }
                     }
                 }
                 1 -> NotificationScreen()

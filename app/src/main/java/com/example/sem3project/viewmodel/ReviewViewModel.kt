@@ -76,4 +76,12 @@ class ReviewViewModel(val repo: ReviewRepo= ReviewRepoImpl()): ViewModel() {
         }
     }
 
+    fun fetchBookSpecificReviews(bookId: String) {
+        _isLoading.value = true
+        repo.fetchReviewsByBook(bookId) { items ->
+            _reviews.value = items
+            _isLoading.value = false
+        }
+    }
+
 }

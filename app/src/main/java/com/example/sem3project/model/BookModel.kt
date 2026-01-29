@@ -5,6 +5,7 @@ data class BookModel(
     var bookName: String = "",
     var author: String = "",
     var genreId: String = "",
+    val summary: String? = "",
     var description: String = "",
     var imageUrl: String = ""
 ){
@@ -13,6 +14,7 @@ data class BookModel(
             "bookName" to bookName,
             "author" to author,
             "genreId" to genreId,
+            "summary" to summary,
             "description" to description,
             "imageUrl" to imageUrl
         )

@@ -73,4 +73,22 @@ class ReviewRepoImpl : ReviewRepo {
             callback(task.isSuccessful)
         }
     }
+
+    override fun fetchReviewsByBook(
+        bookId: String,
+        callback: (List<ReviewModel>) -> Unit
+    ) {
+        database.orderByChild("bookId").equalTo(bookId)
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val items = snapshot.children.mapNotNull { data ->
+                        data.getValue(ReviewModel::class.java)?.copy(id = data.key ?: "")
+                    }
+                    callback(items)
+                }
+                override fun onCancelled(error: DatabaseError) {
+                    callback(emptyList())
+                }
+            })
+    }
 }

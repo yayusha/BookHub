@@ -83,4 +83,23 @@ class BookRepoImpl : BookRepo {
                 }
             })
     }
+
+    override fun fetchBooks(callback: (List<BookModel>) -> Unit) {
+        ref.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val list = mutableListOf<BookModel>()
+                for (child in snapshot.children) {
+                    val book = child.getValue(BookModel::class.java)
+                    book?.let {
+                        it.bookId = child.key ?: ""   // 🔥 VERY IMPORTANT
+                        list.add(it)
+                    }
+                }
+                callback(list)
+            }
+
+            override fun onCancelled(error: DatabaseError) {}
+        })
+    }
+
 }

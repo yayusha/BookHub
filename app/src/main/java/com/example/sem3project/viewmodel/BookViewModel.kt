@@ -1,6 +1,7 @@
 package com.example.sem3project.viewmodel
 
 import android.content.Context
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -8,19 +9,40 @@ import com.example.sem3project.model.BookModel
 import com.example.sem3project.repo.BookRepo
 import com.example.sem3project.utils.NotificationHelper
 
-class BookViewModel(val repo: BookRepo) : ViewModel() {
+class BookViewModel(
+    private val repo: BookRepo) : ViewModel() {
+
+    // ---------- SINGLE BOOK ----------
+    private val _selectedBook = MutableLiveData<BookModel?>()
+    val selectedBook: LiveData<BookModel?> get() = _selectedBook
+
+    // ---------- ADMIN DASHBOARD ----------
+    private val _dashboardBooks = MutableLiveData<List<BookModel>>()
+    val dashboardBooks: LiveData<List<BookModel>> get() = _dashboardBooks
+
+    private val _allBooks = MutableLiveData<List<BookModel>>()
+    val allBooks: LiveData<List<BookModel>> get() = _allBooks
 
     private var originalList = listOf<BookModel>()
 
-    private val _books = MutableLiveData<BookModel?>()
-    val books: LiveData<BookModel?> get() = _books
+    // ---------- USER HOME (COMPOSE) ----------
+    var bookListState = mutableStateOf<List<BookModel>>(emptyList())
+        private set
 
-    private val _dashboardBooks = MutableLiveData<List<BookModel>?>()
-    val dashboardBooks: LiveData<List<BookModel>?> get() = _dashboardBooks
+    var selectedBookState = mutableStateOf<BookModel?>(null)
+        private set
 
-    private val _allBooks = MutableLiveData<List<BookModel>?>()
-    val allBooks: LiveData<List<BookModel>?> get() = _allBooks
+    init {
+        fetchBooks()
+    }
 
+    private fun fetchBooks() {
+        repo.fetchBooks { list ->
+            bookListState.value = list
+        }
+    }
+
+    // ---------- CRUD ----------
     fun addBook(
         context: Context,
         model: BookModel,
@@ -43,8 +65,11 @@ class BookViewModel(val repo: BookRepo) : ViewModel() {
     }
 
     fun getBookById(bookID: String) {
-        repo.getBookById(bookID) { success, _, data ->
-            if (success) _books.postValue(data)
+        repo.getBookById(bookID) { success, _, book ->
+            if (success && book != null) {
+                selectedBookState.value = book
+                _selectedBook.postValue(book)
+            }
         }
     }
 
@@ -59,9 +84,14 @@ class BookViewModel(val repo: BookRepo) : ViewModel() {
     }
 
     fun filterByGenre(genreId: String) {
-        if (genreId.isEmpty()) _dashboardBooks.postValue(originalList)
-        else _dashboardBooks.postValue(
-            originalList.filter { it.genreId.equals(genreId, ignoreCase = true) }
-        )
+        if (genreId.isEmpty()) {
+            _dashboardBooks.postValue(originalList)
+        } else {
+            _dashboardBooks.postValue(
+                originalList.filter {
+                    it.genreId.equals(genreId, ignoreCase = true)
+                }
+            )
+        }
     }
 }

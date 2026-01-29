@@ -11,11 +11,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Sem3Project">
 
-        <!-- Launcher Activity -->
+        <!-- Splash -->
         <activity
             android:name=".view.SplashActivity"
             android:exported="true"
-            android:label="@string/title_activity_splash"
             android:theme="@style/Theme.Sem3Project">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,40 +22,32 @@
             </intent-filter>
         </activity>
 
+        <!-- Compose Nav -->
+        <activity
+            android:name=".view.MainNavActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Sem3Project" />
+
         <!-- Auth -->
-        <activity
-            android:name=".view.LoginActivity"
-            android:exported="true" />
-        <activity
-            android:name=".view.RegistrationActivity"
-            android:exported="true" />
-        <activity
-            android:name=".view.Forget"
-            android:exported="false" />
+        <activity android:name=".view.LoginActivity" android:exported="true" />
+        <activity android:name=".view.RegistrationActivity" android:exported="true" />
+        <activity android:name=".view.Forget" android:exported="false" />
 
         <!-- Dashboards -->
-        <activity
-            android:name=".view.UserDashboard"
-            android:exported="true" />
+        <activity android:name=".view.UserDashboard" android:exported="true" />
         <activity
             android:name=".view.AdminDashboard"
-            android:exported="true"
-            android:label="@string/title_activity_admin_dashboard" />
+            android:exported="true" />
 
         <!-- Books -->
         <activity
             android:name=".view.AddBook"
             android:exported="true"
-            android:label="Add Book"
             android:theme="@style/Theme.Sem3Project" />
-        <activity
-            android:name=".view.Details"
-            android:exported="false" />
+<!--        <activity android:name=".view.Details" android:exported="true" />-->
 
-        <!-- Optional / extra -->
-        <activity
-            android:name=".view.MainActivity"
-            android:exported="false" />
+        <!-- Optional -->
+        <activity android:name=".view.MainActivity" android:exported="false" />
 
     </application>
 
