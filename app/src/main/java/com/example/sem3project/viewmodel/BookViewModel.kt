@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import com.example.sem3project.model.BookModel
 import com.example.sem3project.repo.BookRepo
 import com.example.sem3project.utils.NotificationHelper
+import com.google.firebase.database.FirebaseDatabase
 
 class BookViewModel(
     private val repo: BookRepo) : ViewModel() {
@@ -93,5 +94,25 @@ class BookViewModel(
                 }
             )
         }
+    }
+
+    fun toggleReadStatus(bookId: String, userId: String) {
+        val ref = FirebaseDatabase.getInstance()
+            .getReference("user_activities")
+            .child(userId)
+            .child("read_books")
+            .child(bookId)
+
+        ref.setValue(true)
+    }
+
+    fun toggleWishlist(bookId: String, userId: String) {
+        val ref = FirebaseDatabase.getInstance()
+            .getReference("user_activities")
+            .child(userId)
+            .child("wishlist")
+            .child(bookId)
+
+        ref.setValue(true)
     }
 }

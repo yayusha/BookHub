@@ -98,36 +98,108 @@ fun BookDetailsScreen(
             }
         }
     ) { padding ->
-        LazyColumn(modifier = Modifier.fillMaxSize().padding(padding).background(Color(0xFFF8F9FA))) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize().padding(padding).background(Color(0xFFF8F9FA))
+        ) {
             item {
                 selectedBook?.let { book ->
                     Column(
-                        modifier = Modifier.fillMaxWidth().background(hubGreen.copy(alpha = 0.05f)).padding(16.dp),
+                        modifier = Modifier.fillMaxWidth().background(hubGreen.copy(alpha = 0.05f))
+                            .padding(16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        // Book Image
                         Card(
                             elevation = CardDefaults.cardElevation(8.dp),
                             shape = RoundedCornerShape(12.dp),
                             modifier = Modifier.width(160.dp).height(240.dp)
                         ) {
-                            AsyncImage(model = book.imageUrl, contentDescription = null, contentScale = ContentScale.Crop)
+                            AsyncImage(
+                                model = book.imageUrl,
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop
+                            )
                         }
+
                         Spacer(modifier = Modifier.height(12.dp))
+
+                        // Book Info
                         Text(book.bookName, fontSize = 22.sp, fontWeight = FontWeight.Bold)
                         Text(book.author, color = hubGreen)
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // --- ACTION BUTTONS (Wishlist & Read) ---
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(
+                                12.dp,
+                                Alignment.CenterHorizontally
+                            )
+                        ) {
+                            // Wishlist Button
+                            OutlinedButton(
+                                onClick = {
+                                    bookViewModel.toggleWishlist(book.bookId, currentUserId)
+                                    Toast.makeText(context, "Added to Wishlist", Toast.LENGTH_SHORT)
+                                        .show()
+                                },
+                                shape = RoundedCornerShape(8.dp),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = hubGreen),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, hubGreen)
+                            ) {
+                                Icon(
+                                    painterResource(id = R.drawable.outline_book_24),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Wishlist", fontSize = 12.sp)
+                            }
+
+                            // Mark as Read Button
+                            Button(
+                                onClick = {
+                                    bookViewModel.toggleReadStatus(book.bookId, currentUserId)
+                                    Toast.makeText(context, "Marked as Read", Toast.LENGTH_SHORT)
+                                        .show()
+                                },
+                                shape = RoundedCornerShape(8.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = hubGreen)
+                            ) {
+                                Icon(
+                                    painterResource(id = R.drawable.outline_check_circle_24),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Read", fontSize = 12.sp)
+                            }
+                        }
                     }
                 }
             }
 
             item {
                 TabRow(selectedTabIndex = if (selectedTab == "Summary") 0 else 1) {
-                    Tab(selected = selectedTab == "Summary", onClick = { selectedTab = "Summary" }, text = { Text("Summary") })
-                    Tab(selected = selectedTab == "Reviews", onClick = { selectedTab = "Reviews" }, text = { Text("Reviews (${reviewList.size})") })
+                    Tab(
+                        selected = selectedTab == "Summary",
+                        onClick = { selectedTab = "Summary" },
+                        text = { Text("Summary") })
+                    Tab(
+                        selected = selectedTab == "Reviews",
+                        onClick = { selectedTab = "Reviews" },
+                        text = { Text("Reviews (${reviewList.size})") })
                 }
             }
 
             if (selectedTab == "Summary") {
-                item { Text(selectedBook?.summary ?: "No summary.", modifier = Modifier.padding(20.dp)) }
+                item {
+                    Text(
+                        selectedBook?.summary ?: "No summary available.",
+                        modifier = Modifier.padding(20.dp)
+                    )
+                }
             } else {
                 items(reviewList) { review ->
                     ReviewItemUi(
