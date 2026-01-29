@@ -36,6 +36,9 @@ fun DashboardBody() {
     val context = LocalContext.current
     val activity = context as Activity
 
+    val auth = com.google.firebase.auth.FirebaseAuth.getInstance()
+    val currentUid = auth.currentUser?.uid ?: ""
+
     data class NavItem(val label: String, val icon: Int)
 
     var selectedIndex by remember { mutableStateOf(0) }
@@ -109,11 +112,13 @@ fun DashboardBody() {
                         composable("detail/{bookId}") { backStackEntry ->
                             val bookId = backStackEntry.arguments?.getString("bookId") ?: ""
                             BookDetailsScreen(bookId = bookId,
-                                navController = navController)
+                                navController = navController,
+                                currentUserId = currentUid
+                            )
                         }
                     }
                 }
-                1 -> NotificationScreen()
+                1 -> NotificationScreen(currentUserId = currentUid)
                 2 -> ProfileScreen()
             }
         }

@@ -28,7 +28,7 @@ class ReviewRepoImpl : ReviewRepo {
         val reviewId = database.push().key ?: ""
         val finalReview = review.copy(reviewId = reviewId)
 
-        database.child(reviewId).setValue(finalReview)
+        database.child(reviewId).setValue(finalReview.toMap())
             .addOnSuccessListener { callback(true) }
             .addOnFailureListener { callback(false) }
     }
@@ -38,12 +38,17 @@ class ReviewRepoImpl : ReviewRepo {
         isEdit: Boolean,
         callback: (Boolean) -> Unit
     ) {
-        val ref = if (isEdit && review.reviewId.isNotEmpty()) database.child(review.reviewId)
-        else database.push()
-
-        val finalReview = if (isEdit) review else review.copy(reviewId = ref.key ?: "")
-
-        ref.setValue(finalReview)
+        val ref = if (isEdit && review.reviewId.isNotEmpty()) {
+            database.child(review.reviewId)
+        } else {
+            database.push()
+        }
+        val finalReview = if (isEdit) {
+            review
+        } else {
+            review.copy(reviewId = ref.key ?: "")
+        }
+        ref.setValue(finalReview.toMap())
             .addOnCompleteListener { callback(it.isSuccessful) }
     }
 

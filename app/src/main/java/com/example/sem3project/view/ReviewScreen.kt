@@ -129,7 +129,7 @@ fun ReviewScreen(
                                     showDeleteDialog = true
                                 },
                                 onResolveClick = {
-                                    viewModel.resolveReview(review.id)
+                                    viewModel.resolveReview(review.reviewId)
                                 }
                             )
                         }
