@@ -33,6 +33,7 @@ import com.example.sem3project.viewmodel.AdminViewModel
 fun AdminProfileScreen(
     viewModel: AdminViewModel = viewModel()
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     val admin by viewModel.adminData
     val isLoading by viewModel.isLoading
 
@@ -152,6 +153,25 @@ fun AdminProfileScreen(
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Text("Edit Account Details")
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Logout Button
+                    OutlinedButton(
+                        onClick = {
+                            com.google.firebase.auth.FirebaseAuth.getInstance().signOut()
+                            val intent = android.content.Intent(context, LoginActivity::class.java)
+                            intent.flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            context.startActivity(intent)
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = Color.Red
+                        )
+                    ) {
+                        Text("Logout", fontWeight = FontWeight.Bold)
                     }
                 }
             }
