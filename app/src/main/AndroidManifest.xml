@@ -1,36 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:allowBackup="true"
-        android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Sem3Project">
+
+        <!-- Splash -->
         <activity
-            android:name=".UserDashboard"
+            android:name=".view.SplashActivity"
             android:exported="true"
-            android:label="@string/title_activity_user_dashboard"
             android:theme="@style/Theme.Sem3Project">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Compose Nav -->
         <activity
-            android:name=".MainActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+            android:name=".view.MainNavActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Sem3Project" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+        <!-- Auth -->
+        <activity android:name=".view.LoginActivity" android:exported="true" />
+        <activity android:name=".view.RegistrationActivity" android:exported="true" />
+        <activity android:name=".view.Forget" android:exported="false" />
+
+        <!-- Dashboards -->
+        <activity android:name=".view.UserDashboard" android:exported="true" />
+        <activity
+            android:name=".view.AdminDashboard"
+            android:exported="true" />
+
+        <!-- Books -->
+        <activity
+            android:name=".view.AddBook"
+            android:exported="true"
+            android:theme="@style/Theme.Sem3Project" />
+<!--        <activity android:name=".view.Details" android:exported="true" />-->
+
+        <!-- Optional -->
+<!--        <activity android:name=".view.MainActivity" android:exported="false" />-->
+
     </application>
 
 </manifest>

@@ -1,0 +1,48 @@
+yayusha | 4b66f55 | delete reviews backend
+yayusha | 6584b46 | Menu panel working
+yayusha | 02cef30 | delete book
+yayusha | b067d9e | WIP on upload-image: edca576 delete done
+yayusha | b05ce22 | index on upload-image: edca576 delete done
+yayusha | edca576 | delete done
+yayusha | 9e80161 | profie add and admin dashboard
+Renisa | 5f3db97 | Merge pull request #7 from yayusha/loginupdate
+Renisa | 34c62c6 | Merge branch 'production' into loginupdate
+Renisa | f024ed4 | Merge pull request #5 from yayusha/upload-image
+Renisa | b1047a7 | Merge branch 'production' into upload-image
+Ekta879 | 59ffbe1 | Login  update
+Renisa | b499318 | Merge pull request #6 from yayusha/coverpage
+Renisa | 3a0cf30 | Merge branch 'production' into coverpage
+Renisa | dedfbaa | Merge branch 'production' into coverpage
+Renisa | bfbd171 | Merge pull request #4 from yayusha/add-book-ui
+Renisa | 0e6141e | Merge branch 'production' into add-book-ui
+Renisa | fd4946f | Merge pull request #3 from yayusha/passupdate
+yayusha | b792f1f | Added upload image in addbook screen
+prasanna12 | cd86799 | successful Registration to realtime database
+Renisa | b81128d | write review
+Renisa | ff4411c | Book details
+Renisa | 5bb73ba | ReviewModel, viewmodel fix
+yayusha | 305a6ee | now with genre id
+yayusha | d8336d7 | Book added now in db
+yayusha | 2afe6b6 | Updated model
+yayusha | 51aa3c3 | Completed addbook UI with model
+Renisa | ff22590 | book view model and review model for book details
+prasanna12 | 7751b72 | Merge branch 'production' of https://github.com/yayusha/BookHub into coverpage
+yayusha | 11bab44 | Add Book UI
+Renisa | 75fa790 | updated forget passowrd
+Renisa | d3fa106 | Merge pull request #2 from yayusha/mvvm
+Renisa | bdad351 | completed mvvm
+Renisa | 22655f5 | MVVM refactoring
+Renisa | b817028 | Merge pull request #1 from yayusha/forgetpass
+Renisa | bcab006 | updated
+Prasanna Shrestha | c1a7401 | Add files via upload
+yayusha | 0cf6b5b | Merge branch 'ekta' into production
+yayusha | 4657c56 | Merge branch 'password' into production
+Prasanna Shrestha | 24a6b23 | Add files via upload
+Renisa | ffd4b66 | Book Detais- Summary
+Renisa | abb36bf | Forget Password
+Prasanna Shrestha | ad96b19 | Add files via upload
+Ekta879 | 68d428e | Add files via upload
+Ekta879 | be66016 | Delete ReviewActivity.kt
+Ekta879 | f7c0c37 | Add files via upload
+Ekta879 | 8ff0bbd | Add files via upload
+yayusha | 397bfed | Initial commit

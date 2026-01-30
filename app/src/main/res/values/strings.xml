@@ -1,4 +1,14 @@
 <resources>
     <string name="app_name">Sem 3 Project</string>
     <string name="title_activity_user_dashboard">UserDashboard</string>
+    <string name="title_activity_forget">Forget</string>
+    <string name="title_activity_otp">OTP</string>
+    <string name="title_activity_new">New</string>
+    <string name="title_activity_details">Details</string>
+    <string name="title_activity_profile">ProfileActivity</string>
+    <string name="title_activity_profile_screen">ProfileScreenActivity</string>
+    <string name="title_activity_add_book">AddBook</string>
+    <string name="title_activity_admin_dashboard">AdminDashboard</string>
+    <string name="title_activity_splash">SplashActivity</string>
+    <string name="title_activity_main_nav">MainNav</string>
 </resources>
