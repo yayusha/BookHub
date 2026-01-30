@@ -71,9 +71,11 @@ fun BookHomeScreen() {
                                 scope.launch { drawerState.close() }
                             },
                             onLogout = {
-                                // Add your actual Firebase SignOut here
+                                com.google.firebase.auth.FirebaseAuth.getInstance().signOut()
                                 Toast.makeText(context, "Logged Out Successfully", Toast.LENGTH_SHORT).show()
-                                // Navigate to Login Activity if needed
+                                val intent = android.content.Intent(context, LoginActivity::class.java)
+                                intent.flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                context.startActivity(intent)
                             }
                         )
                     }
@@ -167,6 +169,18 @@ fun BookListScreen(
                     actionIconContentColor = Color.White
                 )
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    val intent = android.content.Intent(context, AddBook::class.java)
+                    context.startActivity(intent)
+                },
+                containerColor = green20,
+                contentColor = Color.White
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Add Book")
+            }
         }
     ) { p ->
         Box(modifier = Modifier.padding(p)) {
